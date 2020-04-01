@@ -4,21 +4,14 @@
 __author__ = "chenxh"
 
 import os, sys, struct
-from 3dTileset.B3dm import B3dmHeader
+from p3dtiles.B3dm import B3dmHeader 
+from p3dtiles.FileHelper import FileHelper
 
-b3dmfilepath = r"D:\MyCodes\3dtiles\assets\b0.b3dm"
-
-"""
-4s: 4个b'char，4Bytes，32bit
-6I: I: 1个uint32，4Bytes，32bit
-"""
-fmt_headerFirstPart_20B = '4s6I'
-fmt_headerLastPart_8B = ''
-
+b3dmfilepath = r"C:\Users\C\Desktop\p3dtiles\assets\b0.b3dm"
 
 
 if __name__ == '__main__':
-    # print(FileHelper.filesize(b3dmfilepath, 'KB'))
+    print(FileHelper.filesize(b3dmfilepath, 'KB'))
     with open(b3dmfilepath, 'rb') as binfile:
         b3dmHeader = B3dmHeader(binfile)
-        print(b3dmHeader.magic)
+        print(b3dmHeader)

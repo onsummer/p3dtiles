@@ -3,6 +3,10 @@
 
 __author__ = "chenxh"
 
+"""
+练习使用二进制的读写和格式
+"""
+
 import os, sys, struct
 
 filepath = r"D:\MyCodes\3dtiles\0.bin"
