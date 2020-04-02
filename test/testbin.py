@@ -8,8 +8,10 @@ __author__ = "chenxh"
 """
 
 import os, sys, struct
+import pickle, json
+from p3dtiles.FileHelper import FileHelper
 
-filepath = r"D:\MyCodes\3dtiles\0.bin"
+filepath = r"D:\MyCodes\p3dtiles\assets\b0.b3dm"
 
 def writetest():
     with open(filepath, 'wb') as binfile:
@@ -26,6 +28,15 @@ def readtest():
         a, b, c, d = struct.unpack('5s6sif', byte) # 必须满匹配
         print(str(a, 'utf-8'), str(b, 'utf-8'), c, d)
 
+def readbin():
+    with open(filepath, 'rb') as binfile:
+        byte = binfile.read(28)
+        byte = binfile.read(24) # ftJson
+        # (featureJSON_Binary, ) = struct.unpack('24s', byte)
+        byte = binfile.read(472) # btJson
+        (batchJSON_Binary, ) = struct.unpack('472s', byte) # 解译batchJSON为字符串
+        print(FileHelper.bin2str(batchJSON_Binary))
+
 if __name__ == '__main__':
     # writetest()
-    readtest()
+    readbin()
