@@ -32,10 +32,10 @@ def readbin():
     with open(filepath, 'rb') as binfile:
         byte = binfile.read(28)
         byte = binfile.read(24) # ftJson
-        # (featureJSON_Binary, ) = struct.unpack('24s', byte)
-        byte = binfile.read(472) # btJson
-        (batchJSON_Binary, ) = struct.unpack('472s', byte) # 解译batchJSON为字符串
-        print(FileHelper.bin2str(batchJSON_Binary))
+        (featureJSON_Binary, ) = struct.unpack('24s', byte)
+        # byte = binfile.read(472) # btJson
+        # (batchJSON_Binary, ) = struct.unpack('472s', byte) # 解译batchJSON为字符串
+        print(FileHelper.bin2str(featureJSON_Binary))
 
 if __name__ == '__main__':
     # writetest()
