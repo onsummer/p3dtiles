@@ -4,8 +4,8 @@
 __author__ = "chenxh"
 
 import os, sys, struct
-from p3dtiles.B3dm import B3dm 
-from p3dtiles.FileHelper import FileHelper
+from p3dtiles.TileFormat.B3dm import B3dm 
+from utils.FileHelper import FileHelper
 
 # b3dmfilepath = r"D:\MyCodes\p3dtiles\assets\b0.b3dm"
 b3dmfilepath = r"C:\Users\C\Desktop\dragon_low.b3dm"
