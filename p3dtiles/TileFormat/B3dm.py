@@ -12,17 +12,16 @@ class B3dm:
         self.b3dmHeader = B3dmHeader(byte)
         # 读数据体
         byte = self.file_handle.read(self.b3dmHeader.byteLength - 28)
-        # b3dmBody = B3dmBody(self.b3dmHeader, byte)
+        self.b3dmBody = B3dmBody(self.b3dmHeader, byte)
 
     def toDict(self):
         # TODO
         # 返回元组，包括文件头json[dict类型]，ftJSON，btJSON
         # 考虑返回字符串的二进制要素表和批量表数据
-        header_dict = self.b3dmHeader.toDict()
-        # ft_dict = self.b3dmBody.toDict()
-        # bt_dict = self.b3dmBody.toDict()
         # return (header_dict, ft_dict, bt_dict)
-        return (header_dict, )
+        header_dict = self.b3dmHeader.toDict()
+        body_dict = self.b3dmBody.toDict()
+        return (header_dict, body_dict)
 
 class B3dmHeader:
     def __init__(self, buffer_data):
@@ -64,5 +63,11 @@ class B3dmBody:
     '''
     def __init__(self, header, buffer_data):
         self.header = header
-        fmt = ''
+        # fmt = ''
+        pass
+
+    def toDict(self):
+        return {}
+
+    def toString(self):
         pass

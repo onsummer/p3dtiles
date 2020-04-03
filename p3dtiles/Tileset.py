@@ -13,3 +13,9 @@ class Tileset:
     def __init__(self, path):
         # self.dict = json.load(path)
         pass
+
+    def toDict(self):
+        pass
+
+    def toString(self):
+        pass

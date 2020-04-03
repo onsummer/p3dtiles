@@ -9,9 +9,10 @@ __author__ = "chenxh"
 
 import os, sys, struct
 import pickle, json
-from p3dtiles.FileHelper import FileHelper
+from p3dtiles.FileUtils.FileHelper import FileHelper
 
-filepath = r"D:\MyCodes\p3dtiles\assets\b0.b3dm"
+filepath = r"D:\MyCodes\p3dtiles\test\testData\b0.b3dm"
+filepath2 = r"C:\Users\C\Desktop\ur.b3dm"
 
 def writetest():
     with open(filepath, 'wb') as binfile:
@@ -32,10 +33,17 @@ def readbin():
     with open(filepath, 'rb') as binfile:
         byte = binfile.read(28)
         byte = binfile.read(24) # ftJson
-        (featureJSON_Binary, ) = struct.unpack('24s', byte)
-        # byte = binfile.read(472) # btJson
-        # (batchJSON_Binary, ) = struct.unpack('472s', byte) # 解译batchJSON为字符串
-        print(FileHelper.bin2str(featureJSON_Binary))
+        # (featureJSON_Binary, ) = struct.unpack('92s', byte)
+        byte = binfile.read(472) # btJson
+        byte = binfile.read(108780)
+        byte = binfile.read(4)
+        # (batchJSON_Binary) = struct.unpack('632s', byte) # 解译batchJSON为字符串
+        # # DbIdArr = struct.unpack('3885i', byte)
+        data, = struct.unpack('4s', byte)
+        # # print(FileHelper.bin2str(batchJSON_Binary), batch1val, batch2val)
+        # byte = binfile.read(15540)
+        # MinX = struct.unpack('3885f', byte)
+        print(data)
 
 if __name__ == '__main__':
     # writetest()
