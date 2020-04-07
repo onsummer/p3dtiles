@@ -1,8 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 
 import struct, json
 from .. FileUtils.FileHelper import FileHelper
+from . TileBodyTable import FeatureTable
 
 class B3dm:
     def __init__(self, file_handle):
@@ -21,7 +22,10 @@ class B3dm:
         # return (header_dict, ft_dict, bt_dict)
         header_dict = self.b3dmHeader.toDict()
         body_dict = self.b3dmBody.toDict()
-        return (header_dict, body_dict)
+        return {
+            "B3dm.Header" : header_dict,
+            "B3dm.Body" : body_dict
+        }
 
 class B3dmHeader:
     def __init__(self, buffer_data):
@@ -62,12 +66,45 @@ class B3dmBody:
     btJSONHeader同理
     '''
     def __init__(self, header, buffer_data):
+        byte_offset = 0
         self.header = header
+        self.buffer = buffer_data
+        ftJSON_str = FileHelper.bin2str(buffer_data[byte_offset:byte_offset + header.featureTableJSONByteLength])
+        byte_offset += header.featureTableJSONByteLength
+        self.ftJSON = json.loads(ftJSON_str)
+        if (header.featureTableBinaryByteLength != 0):
+            ftBinary_str = FileHelper.bin2str(buffer_data[byte_offset:byte_offset + header.featureTableBinaryByteLength])
+            self.ftBinary = json.loads(ftBinary_str)
+        byte_offset += header.featureTableBinaryByteLength
+        if (header.batchTableJSONByteLength == 0):
+            byte_offset += header.batchTableJSONByteLength + header.batchTableBinaryByteLength
+            return
+        else:
+            btJSON_str = FileHelper.bin2str(buffer_data[byte_offset:byte_offset + header.batchTableJSONByteLength])
+            self.btJSON = json.loads(btJSON_str)
+            byte_offset += header.batchTableJSONByteLength
+            self.btBinary = buffer_data[byte_offset: byte_offset + header.batchTableBinaryByteLength]
+            l = len(self.btBinary)
+            self.btBinary_str = struct.unpack(str(l) + 's', self.btBinary)[0]
+            byte_offset += header.batchTableBinaryByteLength
         # fmt = ''
-        pass
 
     def toDict(self):
-        return {}
+        ''' TODO
+        还需解构FeatureTable和BatchTable @April.07
+        '''
+        return {
+            "B3dm.Body.FeatureTable": {
+                "FeatureTable.JSON" : self.ftJSON,
+                "FeatureTable.Binary" : FileHelper.hasVal(self, "ftBinary")
+            },
+            "B3dm.Body.BatchTable": {
+                "BatchTable.JSON" : self.btJSON,
+                # "btBinary" : self.btBinary_str
+                "BatchTable.Binary" : {}
+            }
+        }
 
     def toString(self):
-        pass
+        body_dict = self.toDict()
+        return json.dumps(body_dict)

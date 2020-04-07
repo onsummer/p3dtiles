@@ -33,3 +33,20 @@ class FileHelper:
         """
         return str(bin, 'utf-8')
 
+    @staticmethod
+    def hasVal(obj, val):
+        if hasattr(obj, val):
+            return obj[val]
+        else:
+            return {}
+
+    @staticmethod
+    def save2jsonfile(path, dict_data, minified = True):
+        """ 字典存为json的快捷方法
+        """
+        with open(path, 'w') as file_handle:
+            import json
+            if minified:
+                file_handle.write(json.dumps(dict_data))
+            else:
+                file_handle.write(json.dumps(dict_data, indent = 4))

@@ -1,4 +1,4 @@
-#!/usr/bin/python python3
+#!/usr/bin/python3
 #-*-coding:utf-8-*-
 
 __author__ = "chenxh"
@@ -11,8 +11,8 @@ import os, sys, struct
 import pickle, json
 from p3dtiles.FileUtils.FileHelper import FileHelper
 
-filepath = r"D:\MyCodes\p3dtiles\test\testData\b0.b3dm"
-filepath2 = r"C:\Users\C\Desktop\ur.b3dm"
+filepath = r".\test\testData\b0.b3dm"
+filepath2 = r"C:\Users\C\Desktop\b0.b3dm"
 
 def writetest():
     with open(filepath, 'wb') as binfile:
@@ -29,22 +29,12 @@ def readtest():
         a, b, c, d = struct.unpack('5s6sif', byte) # 必须满匹配
         print(str(a, 'utf-8'), str(b, 'utf-8'), c, d)
 
-def readbin():
-    with open(filepath, 'rb') as binfile:
-        byte = binfile.read(28)
-        byte = binfile.read(24) # ftJson
-        # (featureJSON_Binary, ) = struct.unpack('92s', byte)
-        byte = binfile.read(472) # btJson
-        byte = binfile.read(108780)
-        byte = binfile.read(4)
-        # (batchJSON_Binary) = struct.unpack('632s', byte) # 解译batchJSON为字符串
-        # # DbIdArr = struct.unpack('3885i', byte)
-        data, = struct.unpack('4s', byte)
-        # # print(FileHelper.bin2str(batchJSON_Binary), batch1val, batch2val)
-        # byte = binfile.read(15540)
-        # MinX = struct.unpack('3885f', byte)
-        print(data)
+def readdemob3dm():
+    with open(os.path.abspath(filepath), 'rb') as binfile:
+        from p3dtiles.TileFormat.B3dm import B3dm
+        b3dm = B3dm(binfile)
+        b3dm_dict = b3dm.toDict()
+        FileHelper.save2jsonfile(r"C:\Users\C\Desktop\b0.json", b3dm_dict, False)
 
 if __name__ == '__main__':
-    # writetest()
-    readbin()
+    readdemob3dm()

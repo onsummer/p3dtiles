@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# test
+test
+
 # Distribution / packaging
 .Python
 build/
@@ -142,5 +145,3 @@ cython_debug/
 media
 static
 
-# test
-test
