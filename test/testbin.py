@@ -30,11 +30,11 @@ def readtest():
         print(str(a, 'utf-8'), str(b, 'utf-8'), c, d)
 
 def readdemob3dm():
-    with open(os.path.abspath(filepath), 'rb') as binfile:
-        from p3dtiles.TileFormat.B3dm import B3dm
-        b3dm = B3dm(binfile)
-        b3dm_dict = b3dm.toDict()
-        FileHelper.save2jsonfile(r"C:\Users\C\Desktop\b0.json", b3dm_dict, False)
+    # abs_path = os.path.abspath(filepath)
+    from p3dtiles.TileFormat.B3dm import B3dm
+    b3dm = B3dm(filepath2)
+    b3dm_dict = b3dm.toDict()
+    FileHelper.save2jsonfile(r"C:\Users\C\Desktop\b0.json", b3dm_dict, False)
 
 if __name__ == '__main__':
     readdemob3dm()

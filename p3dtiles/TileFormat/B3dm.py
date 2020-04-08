@@ -3,28 +3,27 @@
 
 import struct, json
 from .. FileUtils.FileHelper import FileHelper
-from . TileBodyTable import FeatureTable
+from . TileBodyTable.FeatureTable import FeatureTable
+from . TileBodyTable.BatchTable import BatchTable
 
 class B3dm:
-    def __init__(self, file_handle):
-        self.file_handle = file_handle
+    def __init__(self, b3dm_file):
+        byte = None
+        import _io
+        if isinstance(b3dm_file, _io.BufferedReader):
+            byte = b3dm_file.read()
+        else:
+            with open(b3dm_file, 'rb') as file_handle:
+                byte = file_handle.read()
         # 读文件头部
-        byte = self.file_handle.read(28)
-        self.b3dmHeader = B3dmHeader(byte)
+        self.b3dmHeader = B3dmHeader(byte[0:28])
         # 读数据体
-        byte = self.file_handle.read(self.b3dmHeader.byteLength - 28)
-        self.b3dmBody = B3dmBody(self.b3dmHeader, byte)
+        self.b3dmBody = B3dmBody(self.b3dmHeader, byte[28:self.b3dmHeader.byteLength])
 
     def toDict(self):
-        # TODO
-        # 返回元组，包括文件头json[dict类型]，ftJSON，btJSON
-        # 考虑返回字符串的二进制要素表和批量表数据
-        # return (header_dict, ft_dict, bt_dict)
-        header_dict = self.b3dmHeader.toDict()
-        body_dict = self.b3dmBody.toDict()
         return {
-            "B3dm.Header" : header_dict,
-            "B3dm.Body" : body_dict
+            "B3dm.Header" : self.b3dmHeader.toDict(),
+            "B3dm.Body" : self.b3dmBody.toDict()
         }
 
 class B3dmHeader:
@@ -41,68 +40,42 @@ class B3dmHeader:
         self.batchTableBinaryByteLength = self.header[6] # batchTable 二进制大小，若上面是0这个也是0
 
     def toDict(self):
-        header_dict = {}
-        header_dict['magic'] = self.magic
-        header_dict['version'] = self.version
-        header_dict['byteLength'] = self.byteLength
-        header_dict['featureTableJSONByteLength'] = self.featureTableJSONByteLength
-        header_dict['featureTableBinaryByteLength'] = self.featureTableBinaryByteLength
-        header_dict['batchTableJSONByteLength'] = self.batchTableJSONByteLength
-        header_dict['batchTableBinaryByteLength'] = self.batchTableBinaryByteLength
-        return header_dict
+        return {
+            "magic": self.magic,
+            "version": self.version,
+            "byteLength": self.byteLength,
+            "featureTableJSONByteLength": self.featureTableJSONByteLength,
+            "featureTableBinaryByteLength": self.featureTableBinaryByteLength,
+            "batchTableJSONByteLength": self.batchTableJSONByteLength,
+            "batchTableBinaryByteLength": self.batchTableBinaryByteLength
+        }
 
     def toString(self):
         header_dict = self.toDict()
         header_jsonstr = json.dumps(header_dict)
         return header_jsonstr
 
-
 class B3dmBody:
     '''
     body = featuretable + batchtable + glb
-        featuretable = jsonheader[header.featureTableJSONByteLength] + binbody[header.featureTableBinaryByteLength]
-        batchtable = jsonheader[header.batchTableJSONByteLength] + binbody[header.batchTableBinaryByteLength]
-    ftJSONHeader根据 'header.featureTableJSONByteLength' + 's'，用unpack解构，然后用str解码成utf-8即可
-    btJSONHeader同理
+        featuretable = jsonheader + binbody
+        batchtable = jsonheader + binbody
     '''
     def __init__(self, header, buffer_data):
-        byte_offset = 0
+        _buffer = buffer_data
         self.header = header
-        self.buffer = buffer_data
-        ftJSON_str = FileHelper.bin2str(buffer_data[byte_offset:byte_offset + header.featureTableJSONByteLength])
-        byte_offset += header.featureTableJSONByteLength
-        self.ftJSON = json.loads(ftJSON_str)
-        if (header.featureTableBinaryByteLength != 0):
-            ftBinary_str = FileHelper.bin2str(buffer_data[byte_offset:byte_offset + header.featureTableBinaryByteLength])
-            self.ftBinary = json.loads(ftBinary_str)
-        byte_offset += header.featureTableBinaryByteLength
-        if (header.batchTableJSONByteLength == 0):
-            byte_offset += header.batchTableJSONByteLength + header.batchTableBinaryByteLength
-            return
-        else:
-            btJSON_str = FileHelper.bin2str(buffer_data[byte_offset:byte_offset + header.batchTableJSONByteLength])
-            self.btJSON = json.loads(btJSON_str)
-            byte_offset += header.batchTableJSONByteLength
-            self.btBinary = buffer_data[byte_offset: byte_offset + header.batchTableBinaryByteLength]
-            l = len(self.btBinary)
-            self.btBinary_str = struct.unpack(str(l) + 's', self.btBinary)[0]
-            byte_offset += header.batchTableBinaryByteLength
-        # fmt = ''
+        self.feature_table = FeatureTable(_buffer, header)
+        self.batch_table = BatchTable.DEFAULT
+        if (header.batchTableJSONByteLength != 0):
+            self.batch_table = BatchTable(_buffer, header, self.feature_table.ftJSON.JSON["BATCH_LENGTH"])
 
     def toDict(self):
         ''' TODO
         还需解构FeatureTable和BatchTable @April.07
         '''
         return {
-            "B3dm.Body.FeatureTable": {
-                "FeatureTable.JSON" : self.ftJSON,
-                "FeatureTable.Binary" : FileHelper.hasVal(self, "ftBinary")
-            },
-            "B3dm.Body.BatchTable": {
-                "BatchTable.JSON" : self.btJSON,
-                # "btBinary" : self.btBinary_str
-                "BatchTable.Binary" : {}
-            }
+            "B3dm.Body.FeatureTable": self.feature_table.toDict(),
+            "B3dm.Body.BatchTable": self.batch_table.toDict()
         }
 
     def toString(self):
