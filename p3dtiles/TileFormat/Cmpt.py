@@ -5,6 +5,9 @@ import struct
 from .. FileUtils.FileHelper import FileHelper
 
 class Cmpt:
+    '''
+    3dtiles瓦片数据文件的一种：复合类型，即*.cmpt文件
+    '''
     pass
 
 class CmptHeader:

@@ -1,11 +1,16 @@
 #!/usr/bin/python3
 # -*- coding: UTF-8 -*-
 
+__author__ = "chenxh"
+
 from ...FileUtils.FileHelper import FileHelper
 import json, struct
-from .enumDataType import *
+from .DataTypeTranslator import *
 
 class BatchTable:
+    '''
+    3dtiles每个tile数据文件的batchtable数据
+    '''
     DEFAULT = {
         "BatchTable.JSON": {},
         "BatchTable.Binary": {}
@@ -28,6 +33,9 @@ class BatchTable:
         }
 
 class _btJSON:
+    '''
+    BatchTable JSON Header；批量表头
+    '''
     def __init__(self, buffer, fromOffset, toOffset):
         self.binJSON = buffer[fromOffset : toOffset]
         self.JSONStr = FileHelper.bin2str(self.binJSON)
@@ -40,6 +48,9 @@ class _btJSON:
         return self.JSONStr
 
 class _btBinary:
+    '''
+    BatchTable Binary Body；批量表身
+    '''
     def __init__(self, buffer, fromOffset, toOffset, btJSON, batchLength):
         self.ls = self.fmtFactory(btJSON, batchLength)
         self.data = self.unpackList(self.ls, buffer[fromOffset: toOffset])

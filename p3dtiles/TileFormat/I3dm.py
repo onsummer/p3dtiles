@@ -4,7 +4,17 @@
 import struct
 from .. FileUtils.FileHelper import FileHelper
 
+class I3dm:
+    '''
+    3dtiles瓦片数据文件的一种：实例模型类型，即*.i3dm文件
+    '''
+    def __init__(self):
+        pass
+
 class I3dmHeader:
+    '''
+    i3dm瓦片的文件头信息, 可使用i3dm的前32字节构造
+    '''
     def __init__(self, file_handle):
         self.file_handle = file_handle
         self.fmt = '4s7I'

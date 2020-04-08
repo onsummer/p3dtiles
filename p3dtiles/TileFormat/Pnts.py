@@ -5,7 +5,11 @@ import struct
 from .. FileUtils.FileHelper import FileHelper
 
 class Pnts:
-    pass
+    '''
+    3dtiles瓦片数据文件的一种：点云类型，即*.pnts文件
+    '''
+    def __init__(self):
+        pass
 
 class PntsHeader:
     def __init__(self, file_handle):

@@ -1,10 +1,15 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
+__author__ = "chenxh"
+
 from ...FileUtils.FileHelper import FileHelper
 import json, struct
 
 class FeatureTable:
+    '''
+    3dtiles每个tile数据文件的featuretable数据
+    '''
     def __init__(self, buffer, header):
         self.buffer = buffer
         ftJSONLength = header.featureTableJSONByteLength
@@ -22,6 +27,9 @@ class FeatureTable:
         return json.dumps(self.toDict())
 
 class _ftJSON:
+    '''
+    FeatureTable JSON Header；要素表头
+    '''
     def __init__(self, buffer, fromOffset, toOffset):
         self.binJSON = buffer[fromOffset:toOffset]
         self.JSONStr = FileHelper.bin2str(self.binJSON)
@@ -35,6 +43,9 @@ class _ftJSON:
         return self.JSONStr
 
 class _ftBinary:
+    '''
+    FeatureTable Binary Body；要素表身
+    '''
     def __init__(self, buffer, fromOffset, toOffset, ftJSON):
         if fromOffset == toOffset:
             self.binData = None
