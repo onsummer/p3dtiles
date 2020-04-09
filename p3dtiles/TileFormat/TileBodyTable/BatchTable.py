@@ -17,24 +17,38 @@ class BatchTable:
     }
     def __init__(self, buffer, header, batchLength):
         self.buffer = buffer
-        ftJSONLength = header.featureTableJSONByteLength
-        ftBinaryLength = header.featureTableBinaryByteLength
-        btJSONLength = header.batchTableJSONByteLength
+        self.tableType = header.magic
         btBinaryLength = header.batchTableBinaryByteLength
-        fromOffset = ftJSONLength + ftBinaryLength
-        toOffset = fromOffset + btJSONLength
-        self.btJSON = _btJSON(self.buffer, fromOffset, toOffset)
-        self.btBinary = _btBinary(self.buffer, toOffset, toOffset + btBinaryLength, self.btJSON.JSON, batchLength)
+        # 计算btJSON起始偏移量
+        startOffset = header.featureTableJSONByteLength + header.featureTableBinaryByteLength
+        toOffset = startOffset + header.batchTableJSONByteLength
+
+        self.btJSON = {}
+        self.btBinary = {}
+        self.isBinaryEmpty = True
+
+        if header.batchTableJSONByteLength != 0:
+            self.btJSON = _btJSON(self.buffer, startOffset, toOffset)
+            if header.batchTableBinaryByteLength != 0:
+                self.isBinaryEmpty = False
+                self.btBinary = _btBinary(self.buffer, toOffset, toOffset + btBinaryLength, self.btJSON.JSON, batchLength)
 
     def toDict(self):
+        btJSON = self.btJSON
+        btBinary = self.btBinary
+        if isinstance(self.btJSON, dict) == False:
+            btJSON = self.btJSON.toDict()
+        if isinstance(self.btBinary, dict) == False:
+            btBinary = self.btBinary.toDict()
         return {
-            "BatchTable.JSON": self.btJSON.toDict(),
-            "BatchTable.Binary": self.btBinary.toDict()
+            "BatchTable.JSON": btJSON,
+            "BatchTable.Binary": btBinary
         }
 
 class _btJSON:
     '''
     BatchTable JSON Header；批量表头
+    考虑返回一个{}？
     '''
     def __init__(self, buffer, fromOffset, toOffset):
         self.binJSON = buffer[fromOffset : toOffset]
@@ -49,7 +63,7 @@ class _btJSON:
 
 class _btBinary:
     '''
-    BatchTable Binary Body；批量表身
+    BatchTable Binary Body；批量表身，写的不太好，可以优化
     '''
     def __init__(self, buffer, fromOffset, toOffset, btJSON, batchLength):
         self.ls = self.fmtFactory(btJSON, batchLength)

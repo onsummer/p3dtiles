@@ -12,7 +12,6 @@ import pickle, json
 from p3dtiles.FileUtils.FileHelper import FileHelper
 
 filepath = r".\test\testData\b0.b3dm"
-filepath2 = r"C:\Users\C\Desktop\b0.b3dm"
 
 def writetest():
     with open(filepath, 'wb') as binfile:
@@ -32,7 +31,7 @@ def readtest():
 def readdemob3dm():
     # abs_path = os.path.abspath(filepath)
     from p3dtiles.TileFormat.B3dm import B3dm
-    b3dm = B3dm(filepath2)
+    b3dm = B3dm(filepath)
     b3dm_dict = b3dm.toDict()
     FileHelper.save2jsonfile(r"C:\Users\C\Desktop\b0.json", b3dm_dict, False)
 

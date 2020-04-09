@@ -12,15 +12,26 @@ class FeatureTable:
     '''
     def __init__(self, buffer, header):
         self.buffer = buffer
+        self.tableType = header.magic # 指示当前要素表的类型，以便解构ftJSON
+        # ftJSON
         ftJSONLength = header.featureTableJSONByteLength
-        ftBinaryLength = header.featureTableJSONByteLength
         self.ftJSON = _ftJSON(buffer, 0, ftJSONLength)
-        self.ftBinary = _ftBinary(buffer, ftJSONLength, ftJSONLength + ftBinaryLength, self.ftJSON)
+        # ftBinary，可能为空
+        ftBinaryLength = header.featureTableBinaryByteLength
+        self.ftBinary = {}
+        self.isBinaryEmpty = None
+        if ftBinaryLength == 0:
+            self.isBinaryEmpty = True
+        else:
+            self.ftBinary = _ftBinary(buffer, ftJSONLength, ftJSONLength + ftBinaryLength, self.ftJSON)
 
     def toDict(self):
+        ftBin = {}
+        if self.isBinaryEmpty == False:
+            ftBin = self.ftBinary.toDict()
         return {
             "FeatureTable.JSON": self.ftJSON.toDict(),
-            "FeatureTable.Binary": self.ftBinary.toDict()
+            "FeatureTable.Binary": ftBin
         }
 
     def toString(self):
@@ -35,6 +46,7 @@ class _ftJSON:
         self.JSONStr = FileHelper.bin2str(self.binJSON)
         self.JSON = json.loads(self.JSONStr)
         self.batch_length = FileHelper.hasVal(self.JSON, "BATCH_LENGTH")
+        self.rtc_center = FileHelper.hasVal(self.JSON, "RTC_CENTER")
     
     def toDict(self):
         return self.JSON
@@ -44,20 +56,14 @@ class _ftJSON:
 
 class _ftBinary:
     '''
-    FeatureTable Binary Body；要素表身
+    FeatureTable Binary Body；要素表身，还没写完
     '''
     def __init__(self, buffer, fromOffset, toOffset, ftJSON):
-        if fromOffset == toOffset:
-            self.binData = None
+        self._ftJSON = ftJSON
         self.binData = buffer[fromOffset: toOffset]
 
     def toDict(self):
-        if self.binData == None:
-            return {}
-        else:
-            '''
-            TODO
-            '''
-            return {
-                "INFO": "COMMING SOON"
-            }
+        '''
+        TODO
+        '''
+        return {}

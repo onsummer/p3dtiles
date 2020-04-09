@@ -65,9 +65,9 @@ class B3dmHeader:
 
 class B3dmBody:
     '''
-    body = featuretable + batchtable + glb
-        featuretable = jsonheader + binbody
-        batchtable = jsonheader + binbody
+    body = featuretable + [batchtable] + glb
+        featuretable = jsonheader + [binbody]
+        [batchtable] = [jsonheader] + [binbody]
     '''
     def __init__(self, header, buffer_data):
         _buffer = buffer_data
@@ -82,9 +82,12 @@ class B3dmBody:
         '''
         以字典形式，返回B3dmBody
         '''
+        bt = self.batch_table
+        if isinstance(self.batch_table, dict) == False:
+            bt = self.batch_table.toDict()
         return {
             "B3dm.Body.FeatureTable": self.feature_table.toDict(),
-            "B3dm.Body.BatchTable": self.batch_table.toDict()
+            "B3dm.Body.BatchTable": bt
         }
 
     def toString(self):
