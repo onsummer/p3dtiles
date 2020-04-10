@@ -62,6 +62,18 @@ class _ftBinary:
         self._ftJSON = ftJSON
         self.binData = buffer[fromOffset: toOffset]
 
+    def parseFtJSON(self, ftJSON):
+        for key in ftJSON:
+            byteOffset = FileHelper.hasVal(ftJSON[key], "byteOffset")
+            componentType = FileHelper.hasVal(ftJSON[key], "componentType")
+            if isinstance(componentType, dict) == False:
+                # 解析ftBinary
+                fmt = str(byteOffset) + 'I'
+                # 对于b3dm，只有'BATCH_LENGTH'和'RTC_CENTER'两个
+                # https://github.com/CesiumGS/3d-tiles/blob/master/specification/schema/b3dm.featureTable.schema.json
+                struct.unpack(fmt, self.binData)
+                pass
+
     def toDict(self):
         '''
         TODO
