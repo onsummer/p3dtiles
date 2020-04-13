@@ -1,15 +1,35 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-import struct
+__author__ = "chenxh"
+
+import struct, json
 from .. FileUtils.FileHelper import FileHelper
+from . TileBodyTable.FeatureTable import FeatureTable
+from . TileBodyTable.BatchTable import BatchTable
 
 class I3dm:
     '''
     3dtiles瓦片数据文件的一种：实例模型类型，即*.i3dm文件
     '''
-    def __init__(self):
-        pass
+    def __init__(self, i3dmFile):
+        buffer = None
+        import _io
+        if isinstance(i3dmFile, _io.BufferedReader):
+            buffer = i3dmFile.read()
+        else:
+            with open(i3dmFile, 'rb') as file_handle:
+                buffer = file_handle.read()
+        # 读文件头部
+        self.i3dmHeader = I3dmHeader(buffer[0:32])
+        # 读数据体
+        self.i3dmBody = I3dmBody(self.i3dmHeader, buffer[32:self.i3dmHeader.byteLength])
+
+    def toDict(self):
+        return {
+            "I3dm.Header" : self.i3dmHeader.toDict(),
+            "I3dm.Body" : self.i3dmBody.toDict()
+        }
 
 class I3dmHeader:
     '''
@@ -30,6 +50,62 @@ class I3dmHeader:
         self.batchTableBinaryByteLength = self.header[6] # batchTable 二进制大小，若上面是0这个也是0
         self.gltfFormat = self.header[7] # 指示body中gltf的格式，0是uri引用，1是嵌入的glb
 
+    def toDict(self):
+        return {
+            "magic": self.magic,
+            "version": self.version,
+            "byteLength": self.byteLength,
+            "featureTableJSONByteLength": self.featureTableJSONByteLength,
+            "featureTableBinaryByteLength": self.featureTableBinaryByteLength,
+            "batchTableJSONByteLength": self.batchTableJSONByteLength,
+            "batchTableBinaryByteLength": self.batchTableBinaryByteLength,
+            "gltfFormat": self.gltfFormat
+        }
+
+    def toString(self):
+        header_dict = self.toDict()
+        return json.dumps(header_dict)
+    
+
 class I3dmBody:
-    def __init__(self, file_handle):
-        pass
+    '''
+    body = featuretable + [batchtable] + glb
+        featuretable = jsonheader + [binbody]
+        [batchtable] = [jsonheader] + [binbody]
+    '''
+    def __init__(self, header, bufferData):
+        _buffer = bufferData
+        offset = 0
+        # ------ FeatureTable
+        ftJSONLen = header.featureTableJSONByteLength
+        ftBinLen = header.featureTableBinaryByteLength
+        ftJSONBuffer = bufferData[0:ftJSONLen]
+        offset += ftJSONLen + ftBinLen
+        ftBinBuffer = bufferData[ftJSONLen:offset]
+        self.featureTable = FeatureTable(header.magic, ftJSONBuffer, ftBinBuffer)
+
+        # ------ BatchTable
+        btJSONLen = header.batchTableJSONByteLength
+        btBinLen = header.batchTableBinaryByteLength
+        btJSONBuffer = bufferData[offset:offset + btJSONLen]
+        offset += btJSONLen
+        btBinBuffer = bufferData[offset:offset+btBinLen]
+        self.batchTable = BatchTable(header.magic, btJSONBuffer, btBinBuffer, self.featureTable.ftJSON.batchLength)
+
+        # ------ GlTF TODO
+        self.glb = None
+
+    def toDict(self):
+        '''
+        以字典形式，返回B3dmBody
+        '''
+        return {
+            "I3dm.Body.FeatureTable": self.featureTable.toDict(),
+            "I3dm.Body.BatchTable": self.batchTable.toDict()
+        }
+
+    def toString(self):
+        '''
+        以字典的字符串形式，返回B3dmBody
+        '''
+        return json.dumps(self.toDict())

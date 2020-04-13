@@ -10,72 +10,131 @@ class FeatureTable:
     '''
     3dtiles每个tile数据文件的featuretable数据
     '''
-    def __init__(self, buffer, header):
-        self.buffer = buffer
-        self.tableType = header.magic # 指示当前要素表的类型，以便解构ftJSON
-        # ftJSON
-        ftJSONLength = header.featureTableJSONByteLength
-        self.ftJSON = _ftJSON(buffer, 0, ftJSONLength)
-        # ftBinary，可能为空
-        ftBinaryLength = header.featureTableBinaryByteLength
-        self.ftBinary = {}
-        self.isBinaryEmpty = None
-        if ftBinaryLength == 0:
-            self.isBinaryEmpty = True
-        else:
-            self.ftBinary = _ftBinary(buffer, ftJSONLength, ftJSONLength + ftBinaryLength, self.ftJSON)
+    def __init__(self, tableType, ftJSONBuffer, ftBinaryBuffer):
+        self.tableType = tableType
+        self.ftJSON = _FtJSON(self.tableType, ftJSONBuffer)
+        self.ftBinary = _FtBinary(self.tableType, ftBinaryBuffer, self.ftJSON)
 
     def toDict(self):
-        ftBin = {}
-        if self.isBinaryEmpty == False:
-            ftBin = self.ftBinary.toDict()
         return {
             "FeatureTable.JSON": self.ftJSON.toDict(),
-            "FeatureTable.Binary": ftBin
+            "FeatureTable.Binary": self.ftBinary.toDict()
         }
 
     def toString(self):
         return json.dumps(self.toDict())
 
-class _ftJSON:
-    '''
-    FeatureTable JSON Header；要素表头
-    '''
-    def __init__(self, buffer, fromOffset, toOffset):
-        self.binJSON = buffer[fromOffset:toOffset]
-        self.JSONStr = FileHelper.bin2str(self.binJSON)
-        self.JSON = json.loads(self.JSONStr)
-        self.batch_length = FileHelper.hasVal(self.JSON, "BATCH_LENGTH")
-        self.rtc_center = FileHelper.hasVal(self.JSON, "RTC_CENTER")
+class _FtJSON:
+    def __init__(self, tableType, bufferData):
+        self.tableType = tableType
+        self.ftJSON = json.loads(FileHelper.bin2str(bufferData))
+        self.isRefBinaryBody = False
+        if tableType.lower() == 'b3dm':
+            self.buildB3dmJSON()
+        elif tableType.lower() == 'i3dm':
+            self.buildI3dmJSON()
+        elif tableType.lower() == 'pnts':
+            self.buildPntsJSON()
+        else:
+            pass
     
+    def buildB3dmJSON(self):
+        '''
+        解构b3dm.body.ftJSON
+        '''
+        self.batchLength = FileHelper.hasVal(self.ftJSON, 'BATCH_LENGTH')
+        if self.batchLength == None:
+            raise Exception("b3dm.FeatureTable: does not have [BATCH_LENGTH]")
+        self.rtcCenter = FileHelper.hasVal(self.ftJSON, 'RTC_CENTER')
+        self.extension = FileHelper.hasVal(self.ftJSON, 'extension')
+        self.extras = FileHelper.hasVal(self.ftJSON, 'extras')
+        # self.required = ['batchLength']
+
+    def buildI3dmJSON(self):
+        '''
+        解构i3dm.body.ftJSON
+        '''
+        self.instancesLength = FileHelper.hasVal(self.ftJSON, 'INSTANCES_LENGTH')
+        if self.instancesLength == None:
+            raise Exception("i3dm.FeatureTable: does not have [INSTANCES_LENGTH]")
+        
+        self.position = FileHelper.hasVal(self.ftJSON, 'POSITION')
+        self.positionQuantized = FileHelper.hasVal(self.ftJSON, 'POSITION_QUANTIZED')
+        if self.position == None & self.positionQuantized == None:
+            raise Exception("i3dm.FeatureTable: must have one of [POSITION],[POSITION_QUANTIZED]. Now all miss.")
+        
+        self.normalUp = FileHelper.hasVal(self.ftJSON, 'NORMAL_UP')
+        self.normalRight = FileHelper.hasVal(self.ftJSON, 'NORMAL_RIGHT')
+        if self.normalUp == None & self.normalRight == None:
+            raise Exception("i3dm.FeatureTable: [NORMAL_UP] & [NORMAL_RIGHT] must all exist.")
+
+        self.normalUpOct32p = FileHelper.hasVal(self.ftJSON, 'NORMAL_UP_OCT32P')
+        self.normalRightOct32p = FileHelper.hasVal(self.ftJSON, 'NORMAL_RIGHT_OCT32P')
+        if self.normalUpOct32p == None & self.normalRightOct32p == None:
+            raise Exception("i3dm.FeatureTable: [NORMAL_UP_OCT32P] & [NORMAL_RIGHT_OCT32P] must all exist.")
+
+        self.scale = FileHelper.hasVal(self.ftJSON, 'SCALE')
+        self.scaleNonUniform = FileHelper.hasVal(self.ftJSON, 'SCALE_NON_UNIFORM')
+        self.batchId = FileHelper.hasVal(self.ftJSON, 'BATCH_ID')
+        self.rtcCenter = FileHelper.hasVal(self.ftJSON, 'RTC_CENTER')
+        
+        self.quantizedVolumeOffset = FileHelper.hasVal(self.ftJSON, 'QUANTIZED_VOLUME_OFFSET')
+        self.quantizedVolumeScale = FileHelper.hasVal(self.ftJSON, 'QUANTIZED_VOLUME_SCALE')
+        if self.positionQuantized != None:
+            if self.quantizedVolumeOffset == None or self.quantizedVolumeScale == None:
+                raise Exception("i3dm.FeatureTable: while [POSITION_QUANTIZED] existed, [QUANTIZED_VOLUME_OFFSET] and [QUANTIZED_VOLUME_SCALE] must all exist, now one of them missed or all missed.")
+
+        self.eastNorthUp = FileHelper.hasVal(self.ftJSON, 'EAST_NORTH_UP')
+        self.extension = FileHelper.hasVal(self.ftJSON, 'extension')
+        self.extras = FileHelper.hasVal(self.ftJSON, 'extras')
+
+    def buildPntsJSON(self):
+        '''
+        解构pnts.body.ftJSON
+        '''
+        self.pointsLength = FileHelper.hasVal(self.ftJSON, 'POINTS_LENGTH')
+        if self.pointsLength == None:
+            raise Exception("pnts.FeatureTable: must have [POINTS_LENGTH], now miss.")
+        
+        self.position = FileHelper.hasVal(self.ftJSON, 'POSITION')
+        self.positionQuantized = FileHelper.hasVal(self.ftJSON, 'POSITION_QUANTIZED')
+        self.quantizedVolumeOffset = FileHelper.hasVal(self.ftJSON, 'QUANTIZED_VOLUME_OFFSET')
+        self.quantizedVolumeScale = FileHelper.hasVal(self.ftJSON, 'QUANTIZED_VOLUME_SCALE')
+        if self.positionQuantized != None:
+            if self.quantizedVolumeOffset == None or self.quantizedVolumeScale == None:
+                raise Exception("pnts.FeatureTable: while [POSITION_QUANTIZED] exist, [QUANTIZED_VOLUME_OFFSET] and [QUANTIZED_VOLUME_SCALE] must exist.")
+
+        self.RGBA = FileHelper.hasVal(self.ftJSON, 'RGBA')
+        self.RGB = FileHelper.hasVal(self.ftJSON, 'RGB')
+        self.RGB565 = FileHelper.hasVal(self.ftJSON, 'RGB565')
+        self.normal = FileHelper.hasVal(self.ftJSON, 'NORMAL')
+        self.normalOct16p = FileHelper.hasVal(self.ftJSON, 'NORMAL_OCT16P')
+        self.batchId = FileHelper.hasVal(self.ftJSON, 'BATCH_ID')
+        self.rtcCenter = FileHelper.hasVal(self.ftJSON, 'RTC_CENTER')
+        self.constantRGBA = FileHelper.hasVal(self.ftJSON, 'CONSTANT_RGBA')
+        self.batchLength = FileHelper.hasVal(self.ftJSON, 'BATCH_LENGTH')
+        if self.batchId != None:
+            if self.batchLength == None:
+                raise Exception("pnts.FeatureTable: while [BATCH_ID] exist, [BATCH_LENGTH] can not be None.")
+        self.extension = FileHelper.hasVal(self.ftJSON, 'extension')
+        self.extras = FileHelper.hasVal(self.ftJSON, 'extras')
+
     def toDict(self):
-        return self.JSON
+        return self.ftJSON
 
     def toString(self):
-        return self.JSONStr
+        return json.dumps(self.ftJSON)
 
-class _ftBinary:
-    '''
-    FeatureTable Binary Body；要素表身，还没写完
-    '''
-    def __init__(self, buffer, fromOffset, toOffset, ftJSON):
-        self._ftJSON = ftJSON
-        self.binData = buffer[fromOffset: toOffset]
-
-    def parseFtJSON(self, ftJSON):
-        for key in ftJSON:
-            byteOffset = FileHelper.hasVal(ftJSON[key], "byteOffset")
-            componentType = FileHelper.hasVal(ftJSON[key], "componentType")
-            if isinstance(componentType, dict) == False:
-                # 解析ftBinary
-                fmt = str(byteOffset) + 'I'
-                # 对于b3dm，只有'BATCH_LENGTH'和'RTC_CENTER'两个
-                # https://github.com/CesiumGS/3d-tiles/blob/master/specification/schema/b3dm.featureTable.schema.json
-                struct.unpack(fmt, self.binData)
-                pass
+class _FtBinary:
+    def __init__(self, tableType, bufferData, ftJSON):
+      self.tableType = tableType
+      self.data = None
+      if len(bufferData) == 0:
+          self.data = {}
+      else:
+          # 若二进制缓存不为0，那么就要根据ftJSON构造了
+          # TODO
+          self.data = {}
 
     def toDict(self):
-        '''
-        TODO
-        '''
-        return {}
+        return self.data

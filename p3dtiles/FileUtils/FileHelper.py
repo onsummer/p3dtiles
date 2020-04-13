@@ -35,10 +35,12 @@ class FileHelper:
 
     @staticmethod
     def hasVal(obj, val):
+        """判断是否有属性，如果有返回属性值，如果没有返回None
+        """
         if hasattr(obj, val):
             return obj[val]
         else:
-            return {}
+            return None
 
     @staticmethod
     def save2jsonfile(path, dict_data, minified = True):

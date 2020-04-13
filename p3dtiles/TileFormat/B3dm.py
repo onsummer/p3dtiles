@@ -12,18 +12,18 @@ class B3dm:
     '''
     3dtiles瓦片数据文件的一种：批量模型类型，即*.b3dm文件
     '''
-    def __init__(self, b3dm_file):
-        byte = None
+    def __init__(self, b3dmFile):
+        buffer = None
         import _io
-        if isinstance(b3dm_file, _io.BufferedReader):
-            byte = b3dm_file.read()
+        if isinstance(b3dmFile, _io.BufferedReader):
+            buffer = b3dmFile.read()
         else:
-            with open(b3dm_file, 'rb') as file_handle:
-                byte = file_handle.read()
+            with open(b3dmFile, 'rb') as file_handle:
+                buffer = file_handle.read()
         # 读文件头部
-        self.b3dmHeader = B3dmHeader(byte[0:28])
+        self.b3dmHeader = B3dmHeader(buffer[0:28])
         # 读数据体
-        self.b3dmBody = B3dmBody(self.b3dmHeader, byte[28:self.b3dmHeader.byteLength])
+        self.b3dmBody = B3dmBody(self.b3dmHeader, buffer[28:self.b3dmHeader.byteLength])
 
     def toDict(self):
         return {
@@ -60,8 +60,7 @@ class B3dmHeader:
 
     def toString(self):
         header_dict = self.toDict()
-        header_jsonstr = json.dumps(header_dict)
-        return header_jsonstr
+        return json.dumps(header_dict)
 
 class B3dmBody:
     '''
@@ -69,30 +68,39 @@ class B3dmBody:
         featuretable = jsonheader + [binbody]
         [batchtable] = [jsonheader] + [binbody]
     '''
-    def __init__(self, header, buffer_data):
-        _buffer = buffer_data
-        self.feature_table = FeatureTable(_buffer, header)
-        if header.batchTableJSONByteLength == 0:
-            self.batch_table = BatchTable.DEFAULT # 默认给个空的batchtable
-            return
-        else:
-            self.batch_table = BatchTable(_buffer, header, self.feature_table.ftJSON.JSON["BATCH_LENGTH"])
+    def __init__(self, header, bufferData):
+        _buffer = bufferData
+        offset = 0
+        # ------ FeatureTable
+        ftJSONLen = header.featureTableJSONByteLength
+        ftBinLen = header.featureTableBinaryByteLength
+        ftJSONBuffer = bufferData[0:ftJSONLen]
+        offset += ftJSONLen + ftBinLen
+        ftBinBuffer = bufferData[ftJSONLen:offset]
+        self.featureTable = FeatureTable(header.magic, ftJSONBuffer, ftBinBuffer)
+
+        # ------ BatchTable
+        btJSONLen = header.batchTableJSONByteLength
+        btBinLen = header.batchTableBinaryByteLength
+        btJSONBuffer = bufferData[offset:offset + btJSONLen]
+        offset += btJSONLen
+        btBinBuffer = bufferData[offset:offset+btBinLen]
+        self.batchTable = BatchTable(header.magic, btJSONBuffer, btBinBuffer, self.featureTable.ftJSON.batchLength)
+
+        # ------ GlTF TODO
+        self.glb = None
 
     def toDict(self):
         '''
         以字典形式，返回B3dmBody
         '''
-        bt = self.batch_table
-        if isinstance(self.batch_table, dict) == False:
-            bt = self.batch_table.toDict()
         return {
-            "B3dm.Body.FeatureTable": self.feature_table.toDict(),
-            "B3dm.Body.BatchTable": bt
+            "B3dm.Body.FeatureTable": self.featureTable.toDict(),
+            "B3dm.Body.BatchTable": self.batchTable.toDict()
         }
 
     def toString(self):
         '''
         以字典的字符串形式，返回B3dmBody
         '''
-        body_dict = self.toDict()
-        return json.dumps(body_dict)
+        return json.dumps(self.toDict())

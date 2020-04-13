@@ -15,83 +15,52 @@ class BatchTable:
         "BatchTable.JSON": {},
         "BatchTable.Binary": {}
     }
-    def __init__(self, buffer, header, batchLength):
-        self.buffer = buffer
-        self.tableType = header.magic
-        btBinaryLength = header.batchTableBinaryByteLength
-        # 计算btJSON起始偏移量
-        startOffset = header.featureTableJSONByteLength + header.featureTableBinaryByteLength
-        toOffset = startOffset + header.batchTableJSONByteLength
-
-        self.btJSON = {}
-        self.btBinary = {}
-        self.isBinaryEmpty = True
-
-        if header.batchTableJSONByteLength != 0:
-            self.btJSON = _btJSON(self.buffer, startOffset, toOffset)
-            if header.batchTableBinaryByteLength != 0:
-                self.isBinaryEmpty = False
-                self.btBinary = _btBinary(self.buffer, toOffset, toOffset + btBinaryLength, self.btJSON.JSON, batchLength)
+    def __init__(self, tableType, btJSONBuffer, btBinaryBuffer, batchLength):
+        self.tableType = tableType
+        self.btJSON = _BtJSON(tableType, btJSONBuffer)
+        self.btBinary = _BtBinary(tableType, btBinaryBuffer, self.btJSON, batchLength)
 
     def toDict(self):
-        btJSON = self.btJSON
-        btBinary = self.btBinary
-        if isinstance(self.btJSON, dict) == False:
-            btJSON = self.btJSON.toDict()
-        if isinstance(self.btBinary, dict) == False:
-            btBinary = self.btBinary.toDict()
         return {
-            "BatchTable.JSON": btJSON,
-            "BatchTable.Binary": btBinary
+            "BatchTable.JSON": self.btJSON.toDict(),
+            "BatchTable.Binary": self.btBinary.toDict()
         }
 
-class _btJSON:
-    '''
-    BatchTable JSON Header；批量表头
-    考虑返回一个{}？
-    '''
-    def __init__(self, buffer, fromOffset, toOffset):
-        self.binJSON = buffer[fromOffset : toOffset]
-        self.JSONStr = FileHelper.bin2str(self.binJSON)
-        self.JSON = json.loads(self.JSONStr)
+class _BtJSON:
+    def __init__(self, tableType, bufferData):
+        self.tableType = tableType
+        # 如果bufferData是b''，返回的应该是空JSON（字典）
+        self.btJSON = json.loads(FileHelper.bin2str(bufferData))
+        # self.isRefBinaryBody = False # 备用
 
     def toDict(self):
-        return self.JSON
+        return self.btJSON
 
-    def toString(self):
-        return self.JSONStr
+class _BtBinary:
+    def __init__(self, tableType, bufferData, btJSON, batchLength):
+        self.tableType = tableType
+        self.btJSON = btJSON
+        self.data = None
+        if len(bufferData) == 0:
+            self.data = {}
+        else:
+            offset = 0
+            for batchId in btJSON:
+                # 获取batch组件类型和batch组件的元素数量
+                componentType = btJSON[batchId]["componentType"]
+                _type = btJSON[batchId]["type"]
 
-class _btBinary:
-    '''
-    BatchTable Binary Body；批量表身，写的不太好，可以优化
-    '''
-    def __init__(self, buffer, fromOffset, toOffset, btJSON, batchLength):
-        self.ls = self.fmtFactory(btJSON, batchLength)
-        self.data = self.unpackList(self.ls, buffer[fromOffset: toOffset])
-
-    def fmtFactory(self, btJSON, batchLength):
-        ls = []
-        for batch_id in btJSON:
-            value_type = btJSON[batch_id]["componentType"]
-            cmpt_type = btJSON[batch_id]["type"]
-
-            cmpt_count = getCmptCount(cmpt_type)
-            fmt_str, bytesize = getCTypeFmtStr(value_type)
-
-            fmt = str(batchLength * cmpt_count) + fmt_str
-            offset = batchLength * cmpt_count * bytesize
-            ls.append([batch_id, fmt, offset])
-
-        return ls
-            
-    def unpackList(self, ls, buffer):
-        data = {}
-        offset = 0
-        for batch_cmpt in ls:
-            sub_buffer = buffer[offset:offset + batch_cmpt[2]]
-            offset = offset + batch_cmpt[2]
-            data[batch_cmpt[0]] = (struct.unpack(batch_cmpt[1], sub_buffer))
-        return data
+                # 获取batch组件对应的python解构格式和字节长度
+                fmtStr, bytesize = getCTypeFmtStr(componentType)
+                # 获取当前batchId组件的二进制解构格式字符串
+                componentCount = getCmptCount(_type)
+                fmt = str(batchLength * componentCount) + fmtStr
+                
+                # 解构成字符串，并传递给self的data字典
+                self.data[batchId] = struct.unpack(fmt, bufferData[offset:offset + batchLength * componentCount * bytesize])
+                
+                # 继续为下一个batchId偏移到起点
+                offset += batchLength * componentCount * bytesize
 
     def toDict(self):
         return self.data
