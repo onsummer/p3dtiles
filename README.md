@@ -42,3 +42,34 @@ print(b3dm.toDict())
 - 继续开发I3dm、Pnts、Cmpt瓦片文件的解构
 
 - 递归解构Tileset.json
+```
+
+# 文件结构
+
+p3dtiles 
+├─ .gitignore   `git忽略文件`
+├─ .vscode  `vscode配置文件`
+│  └─ ...
+│
+├─ p3dtiles  `p3dtiles包`
+│  ├─ FileUtils 
+│  │  └─ FileHelper.py  `用于文件操作的帮助模块`
+│  ├─ TileFormat
+│  │  ├─ B3dm.py
+│  │  ├─ Cmpt.py
+│  │  ├─ GlTF.py
+│  │  ├─ I3dm.py
+│  │  ├─ Pnts.py
+│  │  ├─ TileBodyTable
+│  │  │  ├─ BatchTable.py
+│  │  │  ├─ DataTypeTranslator.py    `用于转换各种数据类型与Python结构的模块`
+│  │  │  ├─ FeatureTable.py
+│  │  │  └─ __init__.py
+│  │  └─ __init__.py
+│  ├─ Tileset.py
+│  └─ __init__.py
+│   
+├─ README.md
+└─ test   `测试文档，可删`
+
+```
