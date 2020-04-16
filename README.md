@@ -42,7 +42,6 @@ print(b3dm.toDict())
 - 继续开发I3dm、Pnts、Cmpt瓦片文件的解构
 
 - 递归解构Tileset.json
-```
 
 # 文件结构
 
@@ -71,5 +70,3 @@ p3dtiles
 │   
 ├─ README.md
 └─ test   `测试文档，可删`
-
-```
