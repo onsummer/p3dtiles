@@ -7,6 +7,7 @@ import struct, json
 from .. FileUtils.FileHelper import FileHelper
 from . TileBodyTable.FeatureTable import FeatureTable
 from . TileBodyTable.BatchTable import BatchTable
+from . GlTF import glb
 
 class B3dm:
     '''
@@ -35,9 +36,9 @@ class B3dmHeader:
     '''
     b3dm瓦片的文件头信息, 可使用b3dm的前28字节构造
     '''
-    def __init__(self, buffer_data):
+    def __init__(self, bufferData:bytes):
         fmt = '4s6I' # b3dm死格式，官方规范没更改请勿改动
-        self.header = struct.unpack(fmt, buffer_data)
+        self.header = struct.unpack(fmt, bufferData)
         # 7个数据
         self.magic = 'b3dm' # 常量，'b3dm'
         self.version = self.header[1] # 版本，目前是1
@@ -68,7 +69,7 @@ class B3dmBody:
         featuretable = jsonheader + [binbody]
         [batchtable] = [jsonheader] + [binbody]
     '''
-    def __init__(self, header, bufferData):
+    def __init__(self, header:dict, bufferData:bytes):
         _buffer = bufferData
         offset = 0
         # ------ FeatureTable
@@ -88,7 +89,8 @@ class B3dmBody:
         self.batchTable = BatchTable(header.magic, btJSONBuffer, btBinBuffer, self.featureTable.ftJSON.batchLength)
 
         # ------ GlTF TODO
-        self.glb = None
+        bodySize = header.featureTableJSONByteLength + header.featureTableBinaryByteLength + header.batchTableJSONByteLength + header.batchTableBinaryByteLength
+        self.glb = glb(bufferData[bodySize:])
 
     def toDict(self):
         '''
@@ -96,7 +98,9 @@ class B3dmBody:
         '''
         return {
             "B3dm.Body.FeatureTable": self.featureTable.toDict(),
-            "B3dm.Body.BatchTable": self.batchTable.toDict()
+            "B3dm.Body.BatchTable": self.batchTable.toDict(),
+            "B3dm.Body.glTF": self.glb.toDict()[0], # 测试性质
+            "B3dm.Body.glTF_Bin": self.glb.toDict()[1] # 测试性质
         }
 
     def toString(self):

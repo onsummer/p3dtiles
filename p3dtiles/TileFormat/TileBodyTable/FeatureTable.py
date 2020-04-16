@@ -25,7 +25,7 @@ class FeatureTable:
         return json.dumps(self.toDict())
 
 class _FtJSON:
-    def __init__(self, tableType, bufferData):
+    def __init__(self, tableType:str, bufferData:bytes):
         self.tableType = tableType
         self.ftJSON = json.loads(FileHelper.bin2str(bufferData))
         self.isRefBinaryBody = False
@@ -46,7 +46,7 @@ class _FtJSON:
         if self.batchLength == None:
             raise Exception("b3dm.FeatureTable: does not have [BATCH_LENGTH]")
         self.rtcCenter = FileHelper.hasVal(self.ftJSON, 'RTC_CENTER')
-        self.extension = FileHelper.hasVal(self.ftJSON, 'extension')
+        self.extensions = FileHelper.hasVal(self.ftJSON, 'extensions')
         self.extras = FileHelper.hasVal(self.ftJSON, 'extras')
         # self.required = ['batchLength']
 
@@ -85,7 +85,7 @@ class _FtJSON:
                 raise Exception("i3dm.FeatureTable: while [POSITION_QUANTIZED] existed, [QUANTIZED_VOLUME_OFFSET] and [QUANTIZED_VOLUME_SCALE] must all exist, now one of them missed or all missed.")
 
         self.eastNorthUp = FileHelper.hasVal(self.ftJSON, 'EAST_NORTH_UP')
-        self.extension = FileHelper.hasVal(self.ftJSON, 'extension')
+        self.extensions = FileHelper.hasVal(self.ftJSON, 'extensions')
         self.extras = FileHelper.hasVal(self.ftJSON, 'extras')
 
     def buildPntsJSON(self):
@@ -116,7 +116,7 @@ class _FtJSON:
         if self.batchId != None:
             if self.batchLength == None:
                 raise Exception("pnts.FeatureTable: while [BATCH_ID] exist, [BATCH_LENGTH] can not be None.")
-        self.extension = FileHelper.hasVal(self.ftJSON, 'extension')
+        self.extensions = FileHelper.hasVal(self.ftJSON, 'extensions')
         self.extras = FileHelper.hasVal(self.ftJSON, 'extras')
 
     def toDict(self):
@@ -126,7 +126,7 @@ class _FtJSON:
         return json.dumps(self.ftJSON)
 
 class _FtBinary:
-    def __init__(self, tableType, bufferData, ftJSON):
+    def __init__(self, tableType:str, bufferData:bytes, ftJSON:dict):
       self.tableType = tableType
       self.data = None
       if len(bufferData) == 0:

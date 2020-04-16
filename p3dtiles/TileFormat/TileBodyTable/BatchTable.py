@@ -15,7 +15,7 @@ class BatchTable:
         "BatchTable.JSON": {},
         "BatchTable.Binary": {}
     }
-    def __init__(self, tableType, btJSONBuffer, btBinaryBuffer, batchLength):
+    def __init__(self, tableType:str, btJSONBuffer:bytes, btBinaryBuffer:bytes, batchLength:int):
         self.tableType = tableType
         self.btJSON = _BtJSON(tableType, btJSONBuffer)
         self.btBinary = _BtBinary(tableType, btBinaryBuffer, self.btJSON, batchLength)
@@ -27,17 +27,19 @@ class BatchTable:
         }
 
 class _BtJSON:
-    def __init__(self, tableType, bufferData):
+    def __init__(self, tableType:str, bufferData:bytes):
         self.tableType = tableType
         # 如果bufferData是b''，返回的应该是空JSON（字典）
-        self.btJSON = json.loads(FileHelper.bin2str(bufferData))
+        self.btJSON = {}
+        if len(bufferData) != 0:
+            self.btJSON = json.loads(FileHelper.bin2str(bufferData))
         # self.isRefBinaryBody = False # 备用
 
     def toDict(self):
         return self.btJSON
 
 class _BtBinary:
-    def __init__(self, tableType, bufferData, btJSON, batchLength):
+    def __init__(self, tableType:str, bufferData:bytes, btJSON:dict, batchLength:int):
         self.tableType = tableType
         self.btJSON = btJSON
         self.data = None
