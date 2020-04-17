@@ -1,0 +1,30 @@
+D:\MyCodes\p3dtiles
+├─.gitignore
+├─README.md
+├─test
+|  ├─testb3dm.py
+|  ├─testbin.py
+|  ├─test_pygltflib.py
+|  ├─testData
+|  |    ├─b0.b3dm
+|  |    └Horse.glb
+├─p3dtiles
+|    ├─Tileset.py
+|    ├─__init__.py
+|    ├─TileFormat
+|    |     ├─B3dm.py
+|    |     ├─Cmpt.py
+|    |     ├─GlTF.py
+|    |     ├─I3dm.py
+|    |     ├─Pnts.py
+|    |     ├─__init__.py
+|    |     ├─TileBodyTable
+|    |     |       ├─BatchTable.py
+|    |     |       ├─DataTypeTranslator.py
+|    |     |       ├─FeatureTable.py
+|    |     |       └__init__.py
+|    ├─FileUtils
+|    |     └FileHelper.py
+├─.vscode
+|    ├─launch.json
+|    └settings.json
