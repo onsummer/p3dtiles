@@ -46,30 +46,31 @@ print(b3dm.toDict())
 # 项目结构
 
 ```
-p3dtiles
-├─.gitignore
+目录
+├─.gitignore // git忽略列表
 ├─README.md
-├─test
+├─test // 测试用，可删
 |  └─...
 |
-├─p3dtiles
-|    ├─Tileset.py
+├─p3dtiles // 主包
+|    ├─Tileset.py   // 处理tileset.json文档的模块
 |    ├─__init__.py
-|    ├─TileFormat
-|    |     ├─B3dm.py
-|    |     ├─Cmpt.py
-|    |     ├─GlTF.py
-|    |     ├─I3dm.py
-|    |     ├─Pnts.py
+|    ├─TileFormat   // 子包，处理各种瓦片
+|    |     ├─B3dm.py    // 处理b3dm瓦片的模块
+|    |     ├─Cmpt.py    // 处理cmpt瓦片的模块
+|    |     ├─GlTF.py    // 处理glTF模型的模块
+|    |     ├─I3dm.py    // 处理i3dm瓦片的模块
+|    |     ├─Pnts.py    // 处理pnts瓦片的模块
 |    |     ├─__init__.py
-|    |     └─TileBodyTable
-|    |             ├─BatchTable.py
-|    |             ├─DataTypeTranslator.py
-|    |             ├─FeatureTable.py
+|    |     └─TileBodyTable  // 子包，处理瓦片中的要素表和批量表
+|    |             ├─BatchTable.py  // 处理批量表的模块
+|    |             ├─DataTypeTranslator.py  // 处理两大表时转译结构数据类型的模块
+|    |             ├─FeatureTable.py    // 处理要素表的模块
 |    |             └__init__.py
 |    └─FileUtils
-|          └FileHelper.py
-└─.vscode
+|          └FileHelper.py   // 文件处理的模块
+|
+└─.vscode   // vscode配置
      ├─launch.json
      └─settings.json
 ```
