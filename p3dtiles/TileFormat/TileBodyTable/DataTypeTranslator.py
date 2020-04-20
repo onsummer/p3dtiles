@@ -7,7 +7,7 @@ __author__ = "chenxh"
 枚举一些常见数据类型，并提供转换
 '''
 
-def getCTypeFmtStr(t):
+def getCTypeFmtStr(t:str):
     '''
     传入字符串t，判断它对应的C语言结构体数据类型，并返回python解析字符和比特长度
     '''
@@ -27,7 +27,7 @@ def getCTypeFmtStr(t):
     if t == "DOUBLE":
         return ("d",8)
 
-def getCmptCount(cmptType):
+def getCmptCount(cmptType:str):
     '''
     传入3dtiles batchtable中batch组件的构成类型字符串cmptType，获取对应的元素个数
     cmptType从BatchTableJSON的每一个batchID的type属性获取，只有"SCALAR"、"VEC2"、"VEC3"、"VEC4"四种类型。

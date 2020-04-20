@@ -1,20 +1,27 @@
 # p3dtiles
-3dtiles sdk. Implement using python3 without any dependences.
-Now can read a b3dm file to jsonfile by using B3dm.toDict() method, return a dict and if you like you can save it to a jsonfile.
+3dtiles 开发工具，拟实现读取3dtiles数据集和修改部分数据，如有可能，考虑做数据融合和转换等工作。使用python3原生实现，当前暂无第三方依赖库。
 
-3dtiles 开发工具。使用python3原生实现，当前暂无依赖库。
 现在能读取一个b3dm文件，把它从二进制转换为json，使用B3dm类实例的toDict()方法可以返回一个dict，如果你喜欢可以写入json文件。
+
 现在gltf引用的二进制数据暂时写为base64编码，后续考虑分离。
 
-## test目录
-作者测试用目录，可以删除/ my test folder, you can delete it
+开发中的工作见[TODO](#TODO)。
+基本用法见[Usage/用法](#usage)
 
-## test/testData目录
-测试用数据
+*English Introduction* 
 
-# Usage/用法
+3dtiles sdk, aims to load the binary tile file(`*.b3dm`, `*.i3dm`, `*.pnts`, `*.cmpt`) , load the tileset, and modify some data in it. 
 
-## Load a tile file from given path/从路径读取瓦片
+Implement using python3 without any 3rd-part dependences.
+
+Now it can load a b3dm file to jsonfile by using B3dm.toDict() method, return a \<python dict\> . If you like you can save it to a jsonfile.
+
+Future work see [TODO](#TODO).
+Basic usage see [Usage/用法](#Usage/用法)
+
+<h1 id="usage"> Usage / 用法 </h1>
+
+## Load a tile file from given path / 从路径读取瓦片
 
 ``` python
 from p3dtiles.TileFormat.B3dm import B3dm
@@ -37,7 +44,7 @@ print(b3dm.toDict())
 
 - 完善GlTF模块的代码分离
 
-- 继续完善FeatureTable.FtBinary的解构（主要是i3dm数据）
+- 继续完善FeatureTable.FtBinary的解构（主要是i3dm和pnts瓦片）
 
 - 继续开发I3dm、Pnts、Cmpt瓦片文件的解构
 
@@ -71,6 +78,5 @@ print(b3dm.toDict())
 |          └FileHelper.py   // 文件处理的模块
 |
 └─.vscode   // vscode配置
-     ├─launch.json
-     └─settings.json
+     └─ ...
 ```

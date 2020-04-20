@@ -43,26 +43,31 @@ class _BtBinary:
         self.tableType = tableType
         self.btJSON = btJSON
         self.data = None
+
         if len(bufferData) == 0:
             self.data = {}
         else:
-            offset = 0
-            for batchId in btJSON:
-                # 获取batch组件类型和batch组件的元素数量
-                componentType = btJSON[batchId]["componentType"]
-                _type = btJSON[batchId]["type"]
+            if tableType == 'b3dm':
+                offset = 0
+                for batchId in btJSON:
+                    # 获取batch组件类型和batch组件的元素数量
+                    componentType = btJSON[batchId]["componentType"]
+                    _type = btJSON[batchId]["type"]
 
-                # 获取batch组件对应的python解构格式和字节长度
-                fmtStr, bytesize = getCTypeFmtStr(componentType)
-                # 获取当前batchId组件的二进制解构格式字符串
-                componentCount = getCmptCount(_type)
-                fmt = str(batchLength * componentCount) + fmtStr
-                
-                # 解构成字符串，并传递给self的data字典
-                self.data[batchId] = struct.unpack(fmt, bufferData[offset:offset + batchLength * componentCount * bytesize])
-                
-                # 继续为下一个batchId偏移到起点
-                offset += batchLength * componentCount * bytesize
+                    # 获取batch组件对应的python解构格式和字节长度
+                    fmtStr, bytesize = getCTypeFmtStr(componentType)
+                    # 获取当前batchId组件的二进制解构格式字符串
+                    componentCount = getCmptCount(_type)
+                    fmt = str(batchLength * componentCount) + fmtStr
+                    
+                    # 解构成字符串，并传递给self的data字典
+                    self.data[batchId] = struct.unpack(fmt, bufferData[offset:offset + batchLength * componentCount * bytesize])
+                    
+                    # 继续为下一个batchId偏移到起点
+                    offset += batchLength * componentCount * bytesize
+
+            if tableType == 'pnts':
+                pass
 
     def toDict(self):
         return self.data

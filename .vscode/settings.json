@@ -3,5 +3,6 @@
     "python.linting.pylintArgs": [
 	    "--errors-only",
 	    "--disable=E0401"
-    ]
+    ],
+    "python.pythonPath": "C:\\Users\\C\\anaconda3\\python.exe"
 }

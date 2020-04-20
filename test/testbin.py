@@ -10,6 +10,7 @@ __author__ = "chenxh"
 import os, sys, struct
 import pickle, json
 from p3dtiles.FileUtils.FileHelper import FileHelper
+import numpy, pandas
 
 filepath = r"C:\Users\C\Desktop\output\0\0.b3dm"
 
@@ -31,17 +32,17 @@ def readtest():
 def readdemob3dm():
     # abs_path = os.path.abspath(filepath)
     from p3dtiles.TileFormat.B3dm import B3dm
-    b3dm = B3dm(r"C:\Users\C\Desktop\parent.b3dm")
+    b3dm = B3dm(r"D:\MyCodes\p3dtiles\test\testData\tile.b3dm")
     b3dm_dict = b3dm.toDict()
-    FileHelper.save2jsonfile(r"C:\Users\C\Desktop\b0.json", b3dm_dict, False)
+    FileHelper.save2jsonfile(r"D:\MyCodes\p3dtiles\test\testData\tile.b3dm.json", b3dm_dict, False)
 
 def readdemopnts():
     from p3dtiles.TileFormat.Pnts import Pnts
-    pnts = Pnts(r"E:\p3dtiles-test\3dtiles_16421\2\10.pnts")
+    pnts = Pnts(r"C:\Users\C\Desktop\11.pnts")
     pass
 
 def readdemoi3dm():
     pass
 
 if __name__ == '__main__':
-    readdemob3dm()
+    readdemopnts()

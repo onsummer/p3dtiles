@@ -54,9 +54,6 @@ class FileHelper:
     def save2jsonfile(path:str, dict_data:dict, minified:bool = True):
         """ 字典存为json的快捷方法
         """
-        if os.path.isfile(path) == False:
-            raise Exception("伙计, path不是指向一个文件啊")
-
         with open(path, 'w') as file_handle:
             import json
             if minified:

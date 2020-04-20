@@ -7,6 +7,7 @@ __author__ = "chenxh"
 tileset.json的类描述
 '''
 import json
+from .TileFormat import * 
 
 # TODO
 class Tileset:
