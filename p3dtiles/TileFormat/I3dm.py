@@ -4,9 +4,9 @@
 __author__ = "chenxh"
 
 import struct, json
-from .. FileUtils.FileHelper import FileHelper
-from . TileBodyTable.FeatureTable import FeatureTable
-from . TileBodyTable.BatchTable import BatchTable
+from .. FileUtils import FileHelper
+from . TileBodyTable import FeatureTable
+from . TileBodyTable import BatchTable
 
 class I3dm:
     '''

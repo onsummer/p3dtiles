@@ -3,4 +3,8 @@
 
 __author__ = "chenxh"
 
-from . import FileHelper
+from .FileHelper import FileHelper
+
+__all__ = [
+    'FileHelper'
+]

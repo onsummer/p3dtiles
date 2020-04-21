@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import struct
-from .. FileUtils.FileHelper import FileHelper
+from .. FileUtils import FileHelper
 
 class Cmpt:
     '''

@@ -3,7 +3,7 @@
 
 现在能读取一个b3dm文件，把它从二进制转换为json，使用B3dm类实例的toDict()方法可以返回一个dict，如果你喜欢可以写入json文件。
 
-现在gltf引用的二进制数据暂时写为base64编码，后续考虑分离。
+现在gltf引用的二进制数据暂时写为base64编码，后续考虑提供分离b3dm的模型的功能。
 
 开发中的工作见[TODO](#TODO)。
 基本用法见[Usage/用法](#usage)
@@ -24,22 +24,22 @@ Basic usage see [Usage/用法](#Usage/用法)
 ## Load a tile file from given path / 从路径读取瓦片
 
 ``` python
-from p3dtiles.TileFormat.B3dm import B3dm
+from p3dtiles import B3dm
 
-b3dm = B3dm('../data/XXX.b3dm') # path to a *.b3dm file / b3dm文件的路径
+b3dm = B3dm('XXX.b3dm') # path to a *.b3dm file / b3dm文件的路径
 print(b3dm.toDict())
 ```
 
 ## Load a tile file from fileHandle/从文件指针读取瓦片
 
 ``` python
-from p3dtiles.TileFormat.B3dm import B3dm
+from p3dtiles import B3dm
 
-b3dm = B3dm(open('../data/XXX.b3dm', 'rb')) # give a file reader/给一个文件指针
-# Method 'toDict()' return b3dm's readable format/toDict()方法返回人类可读的格式
+b3dm = B3dm(open('XXX.b3dm', 'rb')) # give a file reader/给一个文件指针
 print(b3dm.toDict()) 
 ```
-
+Method 'toDict()' return b3dm's readable information.
+方法'toDict()'返回人类可读的数据。
 # TODO
 
 - 完善GlTF模块的代码分离

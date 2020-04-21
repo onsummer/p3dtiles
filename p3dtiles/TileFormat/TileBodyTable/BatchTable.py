@@ -3,7 +3,7 @@
 
 __author__ = "chenxh"
 
-from ...FileUtils.FileHelper import FileHelper
+from ...FileUtils import FileHelper
 import json, struct
 from .DataTypeTranslator import *
 
@@ -18,7 +18,7 @@ class BatchTable:
     def __init__(self, tableType:str, btJSONBuffer:bytes, btBinaryBuffer:bytes, batchLength:int):
         self.tableType = tableType
         self.btJSON = _BtJSON(tableType, btJSONBuffer)
-        self.btBinary = _BtBinary(tableType, btBinaryBuffer, self.btJSON, batchLength)
+        self.btBinary = _BtBinary(tableType, btBinaryBuffer, self.btJSON.json, batchLength)
 
     def toDict(self):
         return {
@@ -30,22 +30,22 @@ class _BtJSON:
     def __init__(self, tableType:str, bufferData:bytes):
         self.tableType = tableType
         # 如果bufferData是b''，返回的应该是空JSON（字典）
-        self.btJSON = {}
+        self.json = {}
         if len(bufferData) != 0:
-            self.btJSON = json.loads(FileHelper.bin2str(bufferData))
+            self.json = json.loads(FileHelper.bin2str(bufferData))
         # self.isRefBinaryBody = False # 备用
 
     def toDict(self):
-        return self.btJSON
+        return self.json
 
 class _BtBinary:
     def __init__(self, tableType:str, bufferData:bytes, btJSON:dict, batchLength:int):
         self.tableType = tableType
         self.btJSON = btJSON
-        self.data = None
+        self.data = {}
 
         if len(bufferData) == 0:
-            self.data = {}
+            return
         else:
             if tableType == 'b3dm':
                 offset = 0

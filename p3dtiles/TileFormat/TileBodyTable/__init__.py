@@ -3,7 +3,8 @@
 
 __author__ = 'chenxh'
 
-from . import BatchTable, FeatureTable
+from .BatchTable import BatchTable
+from .FeatureTable import FeatureTable
 from . import DataTypeTranslator
 
 __all__ = [

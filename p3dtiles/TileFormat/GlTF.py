@@ -4,7 +4,7 @@
 __author__ = "chenxh"
 
 import struct, json, os, base64
-from ..FileUtils.FileHelper import FileHelper
+from ..FileUtils import FileHelper
 import _io
 
 
@@ -33,13 +33,13 @@ class glb:
             self.gltfChunk = gltfChunk(file[12:12 + 8 + gltfChunkSize])
             # gltfBinaryDataSize = struct.unpack('I', file[12 + 8 + gltfChunkSize:12 + 8 + gltfChunkSize + 4])[0]
             self.gltfBinaryData = gltfBinaryData(file[12 + 8 + gltfChunkSize:], self.header.version)
-        if isinstance(file, _io.BufferedReader):
+        elif isinstance(file, _io.BufferedReader):
             pass
-        if os.path.isfile(file):
+        elif os.path.isfile(file):
             # self.data = open(file, 'rb').read()
             pass
     
-    def toDict(self):
+    def toDict(self) -> dict:
         return (self.gltfChunk.chunkData.data, FileHelper.bin2str(self.gltfBinaryData.encodedBinary))
 
 class glbHeader:

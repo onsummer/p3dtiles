@@ -3,7 +3,7 @@
 
 __author__ = "chenxh"
 
-from ...FileUtils.FileHelper import FileHelper
+from ...FileUtils import FileHelper
 import json, struct
 
 class FeatureTable:
