@@ -21,12 +21,12 @@ class B3dm:
         else:
             with open(b3dmFile, 'rb') as file_handle:
                 buffer = file_handle.read()
-        # 读文件头部
+
+        # 读文件头部和数据体
         self.b3dmHeader = B3dmHeader(buffer[0:28])
-        # 读数据体
         self.b3dmBody = B3dmBody(self.b3dmHeader, buffer[28:self.b3dmHeader.byteLength])
 
-    def toDict(self):
+    def toDict(self) -> dict:
         return {
             "B3dm.Header" : self.b3dmHeader.toDict(),
             "B3dm.Body" : self.b3dmBody.toDict()
@@ -48,7 +48,7 @@ class B3dmHeader:
         self.batchTableJSONByteLength = self.header[5] # batchTable JSON的大小，0为不存在 
         self.batchTableBinaryByteLength = self.header[6] # batchTable 二进制大小，若上面是0这个也是0
 
-    def toDict(self):
+    def toDict(self) -> dict:
         return {
             "magic": self.magic,
             "version": self.version,
@@ -59,7 +59,7 @@ class B3dmHeader:
             "batchTableBinaryByteLength": self.batchTableBinaryByteLength
         }
 
-    def toString(self):
+    def toString(self) -> str:
         header_dict = self.toDict()
         return json.dumps(header_dict)
 
@@ -92,7 +92,7 @@ class B3dmBody:
         bodySize = header.featureTableJSONByteLength + header.featureTableBinaryByteLength + header.batchTableJSONByteLength + header.batchTableBinaryByteLength
         self.glb = glb(bufferData[bodySize:])
 
-    def toDict(self):
+    def toDict(self) -> dict:
         '''
         以字典形式，返回B3dmBody
         '''
@@ -103,7 +103,7 @@ class B3dmBody:
             "B3dm.Body.glTF_Bin": self.glb.toDict()[1] # 测试性质
         }
 
-    def toString(self):
+    def toString(self) -> str:
         '''
         以字典的字符串形式，返回B3dmBody
         '''

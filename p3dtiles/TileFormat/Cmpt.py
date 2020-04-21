@@ -17,7 +17,7 @@ class CmptHeader:
         byte = self.file_handle.read(16)
         self.header = struct.unpack(self.fmt, byte)
         # 4个数据
-        self.magic = FileHelper.bin2str(self.header[0]) # 应为'cmpt'
+        self.magic = 'cmpt' # 常量 'cmpt'
         self.version = self.header[1] # 应为1
         self.byteLength = self.header[2] # 整个文件体积，包括header和body
         self.tilesLength = self.header[3] # Composite中tile的数量，位于body

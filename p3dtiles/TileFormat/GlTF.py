@@ -7,7 +7,6 @@ import struct, json, os, base64
 from ..FileUtils import FileHelper
 import _io
 
-
 class glTF:
     """
     glTF JSON

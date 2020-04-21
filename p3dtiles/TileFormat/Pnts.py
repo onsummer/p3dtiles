@@ -5,8 +5,7 @@ __author__ = "chenxh"
 
 import struct, json
 from .. FileUtils import FileHelper
-from . TileBodyTable import FeatureTable
-from . TileBodyTable import BatchTable
+from . TileBodyTable import FeatureTable, BatchTable
 
 class Pnts:
     '''
@@ -21,16 +20,14 @@ class Pnts:
             with open(pntsFile, 'rb') as file_handle:
                 buffer = file_handle.read()
 
-        # 读文件头部
+        # 读文件头部、数据体
         self.pntsHeader = PntsHeader(buffer[0:28])
-        bodySize = self.pntsHeader.featureTableJSONByteLength + self.pntsHeader.featureTableBinaryByteLength + self.pntsHeader.batchTableJSONByteLength + self.pntsHeader.batchTableBinaryByteLength
-        # 读数据体
-        self.pntsBody = PntsBody(self.pntsHeader, buffer[28:28 + bodySize])
+        self.pntsBody = PntsBody(self.pntsHeader, buffer[28:])
 
-    def toDict(self):
+    def toDict(self) -> dict:
         return {
-            "I3dm.Header" : self.pntsHeader.toDict(),
-            "I3dm.Body" : self.pntsBody.toDict()
+            "Pnts.Header" : self.pntsHeader.toDict(),
+            "Pnts.Body" : self.pntsBody.toDict()
         }
 
 class PntsHeader:
@@ -41,7 +38,7 @@ class PntsHeader:
         self.fmt = '4s6I'
         self.header = struct.unpack(self.fmt, bufferData)
         # 7个数据
-        self.magic = FileHelper.bin2str(self.header[0]) # 常量，'pnts'
+        self.magic = 'pnts' # 常量，'pnts'
         self.version = self.header[1] # 版本，目前是1
         self.byteLength = self.header[2] # 整个i3dm文件大小包括header和body
         self.featureTableJSONByteLength = self.header[3] # featureTable JSON的大小
@@ -49,7 +46,7 @@ class PntsHeader:
         self.batchTableJSONByteLength = self.header[5] # batchTable JSON的大小，0为不存在
         self.batchTableBinaryByteLength = self.header[6] # batchTable 二进制大小，若上面是0这个也是0
 
-    def toDict(self):
+    def toDict(self) -> dict:
         return {
             "magic": self.magic,
             "version": self.version,
@@ -60,17 +57,15 @@ class PntsHeader:
             "batchTableBinaryByteLength": self.batchTableBinaryByteLength
         }
 
-    def toString(self):
-        header_dict = self.toDict()
-        return json.dumps(header_dict)
+    def toString(self) -> str:
+        headerDict = self.toDict()
+        return json.dumps(headerDict)
     
-
 class PntsBody:
     '''
     body = featuretable + [batchtable]
     '''
     def __init__(self, header, bufferData):
-        _buffer = bufferData
         offset = 0
         # ------ FeatureTable
         ftJSONLen = header.featureTableJSONByteLength
@@ -86,9 +81,9 @@ class PntsBody:
         btJSONBuffer = bufferData[offset:offset + btJSONLen]
         offset += btJSONLen
         btBinBuffer = bufferData[offset:offset+btBinLen]
-        self.batchTable = BatchTable(header.magic, btJSONBuffer, btBinBuffer, self.featureTable.ftJSON.batchLength)
+        self.batchTable = BatchTable(header.magic, btJSONBuffer, btBinBuffer, self.featureTable.ftJSON.pointsLength)
 
-    def toDict(self):
+    def toDict(self) -> dict:
         '''
         以字典形式，返回PntsBody
         '''
@@ -97,7 +92,7 @@ class PntsBody:
             "Pnts.Body.BatchTable": self.batchTable.toDict()
         }
 
-    def toString(self):
+    def toString(self) -> str:
         '''
         以字典的字符串形式，返回PntsBody
         '''
