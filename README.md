@@ -56,8 +56,6 @@ Method 'toDict()' return b3dm's readable information.
 目录
 ├─.gitignore // git忽略列表
 ├─README.md
-├─test // 测试用，可删
-|  └─...
 |
 ├─p3dtiles // 主包
 |    ├─Tileset.py   // 处理tileset.json文档的模块
