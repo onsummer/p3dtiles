@@ -44,11 +44,13 @@ Method 'toDict()' return b3dm's readable information.
 
 - 完善GlTF模块的代码分离
 
-- 继续完善FeatureTable.FtBinary的解构（主要是i3dm和pnts瓦片）
+- 继续完善FeatureTable.FtBinary的解构（主要是i3dm瓦片）
 
-- 继续开发I3dm、Pnts、Cmpt瓦片文件的解构
+- 继续开发I3dm、Cmpt瓦片文件的解构
 
 - 递归解构Tileset.json
+
+- 添加提取瓦片文件元数据的功能（ftJSON、btJSON等用于描述二进制文件的数据）
 
 # 项目结构
 
