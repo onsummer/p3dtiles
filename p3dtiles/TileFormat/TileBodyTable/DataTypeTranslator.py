@@ -72,3 +72,55 @@ def getPntsGlobalPropertyDataType(name:str):
     }
 
     return GLOBAL_SCHEMA[name]
+
+def getI3dmInstancePropertyDataType(name:str, batchIdCmptType:str):
+    INSTANCE_SCHEMA = {
+        "POSITION": ("FLOAT", 3),
+        "POSITION_QUANTIZED": ("UNSIGNED_SHORT", 3),
+        "NORMAL_UP": ("FLOAT", 3),
+        "NORMAL_RIGHT": ("FLOAT", 3),
+        "NORMAL_UP_OCT32P": ("UNSIGNED_SHORT", 3),
+        "NORMAL_RIGHT_OCT32P": ("UNSIGNED_SHORT", 3),
+        "SCALE": ("FLOAT", 1),
+        "SCALE_NON_UNIFORM": ("FLOAT", 3),
+        "BATCH_ID_DEFAULT": ("UNSIGNED_SHORT", 1), # 有问题
+        "BATCH_ID_UINT8": ("UNSIGNED_BYTE", 1), # 有问题
+        "BATCH_ID_UINT32": ("UNSIGNED_INT", 1) # 有问题
+    }
+    if name == "BATCH_ID":
+        if batchIdCmptType.upper() == "UINT16" or batchIdCmptType == None:
+            return INSTANCE_SCHEMA["BATCH_ID_DEFAULT"]
+        elif batchIdCmptType.upper() == "UINT8":
+            return INSTANCE_SCHEMA["BATCH_ID_UINT8"]
+        elif batchIdCmptType.upper() == "UINT32":
+            return INSTANCE_SCHEMA["BATCH_ID_UINT32"]
+    else:
+        return INSTANCE_SCHEMA[name]
+
+def getI3dmGlobalPropertyDataType(name:str):
+    GLOBAL_SCHEMA = {
+        "INSTANCES_LENGTH": ("UNSIGNED_INT", 1),
+        "RTC_CENTER": ("FLOAT", 3),
+        "QUANTIZED_VOLUME_OFFSET": ("FLOAT", 3),
+        "QUANTIZED_VOLUME_SCALE": ("FLOAT", 3),
+        "EAST_NORTH_UP": ("BOOLEAN", 1)
+    }
+
+    return GLOBAL_SCHEMA[name]
+
+# [Experimental!]
+def getVctrVectorPropertyDataType(name:str):
+    VECTOR_SCHEMA = {
+    }
+
+# [Experimental!]
+def getVctrGlobalPropertyDataType(name:str):
+    GLOBAL_SCHEMA = {
+        "POLYGONS_LENGTH": ("UNSIGNED_INT", 1),
+        "POLYLINES_LENGTH": ("UNSIGNED_INT", 1),
+        "POINTS_LENGTH": ("UNSIGNED_INT", 1),
+        "REGION": ("FLOAT", 6),
+        "RTC_CENTER": ("FLOAT", 1)
+    }
+
+    return GLOBAL_SCHEMA[name]
