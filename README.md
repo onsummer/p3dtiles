@@ -66,6 +66,7 @@ Method 'toDict()' return b3dm's readable information.
 |    |     ├─B3dm.py    // 处理b3dm瓦片的模块
 |    |     ├─Cmpt.py    // 处理cmpt瓦片的模块
 |    |     ├─GlTF.py    // 处理glTF模型的模块
+|    |     ├─Vctr.py    // 处理Vctr模型的模块
 |    |     ├─I3dm.py    // 处理i3dm瓦片的模块
 |    |     ├─Pnts.py    // 处理pnts瓦片的模块
 |    |     ├─__init__.py
