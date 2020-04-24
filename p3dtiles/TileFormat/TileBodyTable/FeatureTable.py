@@ -120,13 +120,15 @@ class _FtBinary:
 
         if tableType == 'b3dm':
             self._itemsCount = ftJSON['BATCH_LENGTH']
-            self.buildB3dmFtBinary()
+            # b3dm do not have ftBinary
         elif tableType == 'i3dm':
             self._itemsCount = ftJSON['INSTANCES_LENGTH']
             self.buildI3dmFtBinary()
         elif tableType == 'pnts':
             self._itemsCount = ftJSON['POINTS_LENGTH']
             self.buildPntsFtBinary()
+        elif tableType == 'vctr':
+            pass
 
     def buildPntsFtBinary(self):
         POINT_SCHEMA_KEYS = ["POSITION", "POSITION_QUANTIZED", "RGBA", "RGB", "RGB565", "NORMAL", "NORMAL_OCT16P", "BATCH_ID"]
@@ -160,15 +162,25 @@ class _FtBinary:
             
             # 全局属性，通常直接写在ftJSON里，就让它存在ftJSON里就可以了
             elif key in GLOBAL_SCHEMA_KEYS:
-                # self.data[key] = self._ftJSON[key]
+                # self.data[key] = self._ftJSON[key] 其实不用写入data让它留在JSON头就可以了
                 pass
             else:
                 pass
 
     def buildI3dmFtBinary(self):
-        pass
+        INSTANCE_SCHEMA_KEYS = ["POSITION", "POSITION_QUANTIZED", "NORMAL_UP", "NORMAL_RIGHT", "NORMAL_UP_OCT32P", "NORMAL_RIGHT_OCT32P", "SCALE", "SCALE_NON_UNIFORM", "BATCH_ID"]
+        GLOBAL_SCHEMA_KEYS = ["INSTANCES_LENGTH", "RTC_CENTER", "QUANTIZED_VOLUME_OFFSET", "QUANTIZED_VOLUME_SCALE", "EAST_NORTH_UP"]
 
-    def buildB3dmFtBinary(self):
+        keys = self._ftJSON.keys()
+        for key in keys:
+            if key in INSTANCE_SCHEMA_KEYS:
+                pass
+            elif key in GLOBAL_SCHEMA_KEYS:
+                pass
+            else:
+                pass
+
+    def buildVctrFtBinary(self):
         pass
 
     def toDict(self) -> dict:
