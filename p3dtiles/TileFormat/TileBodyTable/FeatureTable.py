@@ -160,7 +160,7 @@ class _FtBinary:
                 # 绑定到data上
                 self.data[key] = list(dataItem)
             
-            # 全局属性，通常直接写在ftJSON里，直接获取
+            # 全局属性，通常直接写在ftJSON里，就让它存在ftJSON里就可以了
             elif key in GLOBAL_SCHEMA_KEYS:
                 # self.data[key] = self._ftJSON[key] 其实不用写入data让它留在JSON头就可以了
                 pass
