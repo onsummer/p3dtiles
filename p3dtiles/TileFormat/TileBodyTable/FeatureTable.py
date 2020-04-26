@@ -59,18 +59,18 @@ class _FtJSON:
         
         position = FileHelper.hasVal(self._ftJSON, 'POSITION')
         positionQuantized = FileHelper.hasVal(self._ftJSON, 'POSITION_QUANTIZED')
-        if position == None & positionQuantized == None:
+        if position == None and positionQuantized == None:
             raise Exception("i3dm.FeatureTable: must have one of [POSITION],[POSITION_QUANTIZED]. Now all miss.")
         
         normalUp = FileHelper.hasVal(self._ftJSON, 'NORMAL_UP')
         normalRight = FileHelper.hasVal(self._ftJSON, 'NORMAL_RIGHT')
-        if normalUp == None & normalRight == None:
-            raise Exception("i3dm.FeatureTable: [NORMAL_UP] & [NORMAL_RIGHT] must all exist.")
+        if (normalUp != None and normalRight == None) or (normalUp == None and normalRight != None):
+            raise Exception("i3dm.FeatureTable: [NORMAL_UP] & [NORMAL_RIGHT] miss one of them.")
 
         normalUpOct32p = FileHelper.hasVal(self._ftJSON, 'NORMAL_UP_OCT32P')
         normalRightOct32p = FileHelper.hasVal(self._ftJSON, 'NORMAL_RIGHT_OCT32P')
-        if normalUpOct32p == None & normalRightOct32p == None:
-            raise Exception("i3dm.FeatureTable: [NORMAL_UP_OCT32P] & [NORMAL_RIGHT_OCT32P] must all exist.")
+        if (normalUpOct32p == None and normalRightOct32p != None) or (normalUpOct32p != None and normalRightOct32p == None):
+            raise Exception("i3dm.FeatureTable: [NORMAL_UP_OCT32P] & [NORMAL_RIGHT_OCT32P] miss one of them.")
 
         quantizedVolumeOffset = FileHelper.hasVal(self._ftJSON, 'QUANTIZED_VOLUME_OFFSET')
         quantizedVolumeScale = FileHelper.hasVal(self._ftJSON, 'QUANTIZED_VOLUME_SCALE')
@@ -174,7 +174,26 @@ class _FtBinary:
         keys = self._ftJSON.keys()
         for key in keys:
             if key in INSTANCE_SCHEMA_KEYS:
-                pass
+                batchIdCmptType = None
+                if key == "BATCH_ID":
+                    batchIdCmptType = self._ftJSON[key]["componentType"].upper()
+
+                # 获取点要素的类型元数据，即"组件元素值类型, 组件元素个数"
+                typeInfo = getI3dmInstancePropertyDataType(key, batchIdCmptType)
+                # 获取"组件元素值类型"对应的类型元数据，即"C语言结构体类型, byte长度"
+                fmtInfo = getCTypeFmtStr(typeInfo[0])
+
+                # 拼凑unpack所需的结构字符串 即 {点数 * 组件元素个数)个 C语言结构体类型
+                fmtStr = str(self._itemsCount * typeInfo[1]) + fmtInfo[0] 
+                # 获取buffer对应的切片
+                bufferLength = self._itemsCount * typeInfo[1] * fmtInfo[1]
+                bufferSub = self._buffer[self._ftJSON[key]["byteOffset"]:self._ftJSON[key]["byteOffset"] + bufferLength]
+                
+                # 解构成当前key的数据（返回元组）
+                dataItem = struct.unpack(fmtStr, bufferSub)
+                # 绑定到data上
+                self.data[key] = list(dataItem)
+
             elif key in GLOBAL_SCHEMA_KEYS:
                 pass
             else:

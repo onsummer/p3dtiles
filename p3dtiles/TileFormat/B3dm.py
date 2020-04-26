@@ -5,8 +5,7 @@ __author__ = "chenxh"
 
 import struct, json
 from .. FileUtils import FileHelper
-from . TileBodyTable import FeatureTable
-from . TileBodyTable import BatchTable
+from . TileBodyTable import FeatureTable, BatchTable
 from . GlTF import glb
 
 class B3dm:

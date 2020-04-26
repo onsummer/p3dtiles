@@ -6,6 +6,7 @@ __author__ = "chenxh"
 import struct, json
 from .. FileUtils import FileHelper
 from . TileBodyTable import FeatureTable, BatchTable
+from . GlTF import glb
 
 class I3dm:
     '''
@@ -33,11 +34,9 @@ class I3dmHeader:
     '''
     i3dm瓦片的文件头信息, 可使用i3dm的前32字节构造
     '''
-    def __init__(self, file_handle):
-        self.file_handle = file_handle
+    def __init__(self, bufferData):
         self.fmt = '4s7I'
-        byte = self.file_handle.read(32)
-        self.header = struct.unpack(self.fmt, byte)
+        self.header = struct.unpack(self.fmt, bufferData)
         # 8个数据
         self.magic = 'i3dm' # 常量，'i3dm'
         self.version = self.header[1] # 版本，目前是1
@@ -87,10 +86,11 @@ class I3dmBody:
         btJSONBuffer = bufferData[offset:offset + btJSONLen]
         offset += btJSONLen
         btBinBuffer = bufferData[offset:offset+btBinLen]
-        self.batchTable = BatchTable(header.magic, btJSONBuffer, btBinBuffer, self.featureTable.ftJSON.batchLength)
+        self.batchTable = BatchTable(header.magic, btJSONBuffer, btBinBuffer, self.featureTable.ftJSON)
 
         # ------ GlTF TODO
-        self.glb = None
+        bodySize = header.featureTableJSONByteLength + header.featureTableBinaryByteLength + header.batchTableJSONByteLength + header.batchTableBinaryByteLength
+        self.glb = glb(bufferData[bodySize:])
 
     def toDict(self) -> dict:
         '''
@@ -98,7 +98,9 @@ class I3dmBody:
         '''
         return {
             "I3dm.Body.FeatureTable": self.featureTable.toDict(),
-            "I3dm.Body.BatchTable": self.batchTable.toDict()
+            "I3dm.Body.BatchTable": self.batchTable.toDict(),
+            "I3dm.Body.glTF": self.glb.toDict()[0], # 测试性质
+            "I3dm.Body.glTF_Bin": self.glb.toDict()[1] # 测试性质
         }
 
     def toString(self) -> str:
