@@ -50,9 +50,15 @@ class _BtBinary:
         if tableType == 'b3dm':
             offset = 0
             for batchId in btJSON:
+                batch = btJSON[batchId]
+
+                # 如果没有byteOffset 说明数据就在btJSON里记录了
+                if FileHelper.hasVal(batch, 'byteOffset') == None:
+                    continue
+                
                 # 获取batch组件类型和batch组件的元素数量
-                componentType = btJSON[batchId]["componentType"]
-                _type = btJSON[batchId]["type"]
+                componentType = batch["componentType"]
+                _type = batch["type"]
 
                 # 获取batch组件对应的python解构格式和字节长度
                 fmtStr, bytesize = getCTypeFmtStr(componentType)
