@@ -7,6 +7,7 @@ from .B3dm import B3dm
 from .I3dm import I3dm
 from .Pnts import Pnts
 from .Cmpt import Cmpt
+from .Vctr import Vctr
 from .TileBodyTable.BatchTable import BatchTable
 from .TileBodyTable.FeatureTable import FeatureTable
 
@@ -15,6 +16,7 @@ __all__ = [
     'I3dm',
     'Pnts',
     'Cmpt',
+    'Vctr',
     'BatchTable',
     'FeatureTable'
 ]

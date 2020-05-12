@@ -1,4 +1,4 @@
-import os
+import os,struct
 
 def filesize(path:str, fmt:str = 'B'):
     """ 获取文件大小，默认单位是Bytes
@@ -52,3 +52,9 @@ def save2jsonfile(path:str, dict_data:dict, minified:bool = True):
             file_handle.write(json.dumps(dict_data))
         else:
             file_handle.write(json.dumps(dict_data, indent = 4))
+
+def save2File(path:str, bufferData:bytes):
+    """ 
+    """
+    with open(path, 'wb') as file_handle:
+        file_handle.write(bufferData)
