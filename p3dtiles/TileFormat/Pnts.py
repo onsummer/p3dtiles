@@ -48,20 +48,20 @@ class PntsBody:
     def __init__(self, header, bufferData):
         offset = 0
         # ------ FeatureTable
-        ftJSONLen = header.featureTableJSONByteLength
-        ftBinLen = header.featureTableBinaryByteLength
+        ftJSONLen = header['featureTableJSONByteLength']
+        ftBinLen = header['featureTableBinaryByteLength']
         ftJSONBuffer = bufferData[0:ftJSONLen]
         offset += ftJSONLen + ftBinLen
         ftBinBuffer = bufferData[ftJSONLen:offset]
-        self.featureTable = FeatureTable(header.magic, ftJSONBuffer, ftBinBuffer)
+        self.featureTable = FeatureTable(header['magic'], ftJSONBuffer, ftBinBuffer)
 
         # ------ BatchTable
-        btJSONLen = header.batchTableJSONByteLength
-        btBinLen = header.batchTableBinaryByteLength
+        btJSONLen = header['batchTableJSONByteLength']
+        btBinLen = header['batchTableBinaryByteLength']
         btJSONBuffer = bufferData[offset:offset + btJSONLen]
         offset += btJSONLen
         btBinBuffer = bufferData[offset:offset+btBinLen]
-        self.batchTable = BatchTable(header.magic, btJSONBuffer, btBinBuffer, self.featureTable.ftJSON.pointsLength)
+        self.batchTable = BatchTable(header['magic'], btJSONBuffer, btBinBuffer, self.featureTable.ftJSON.pointsLength)
 
     def toDict(self) -> dict:
         '''

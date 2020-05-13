@@ -42,6 +42,18 @@ class I3dm:
             "I3dm.Body" : self.body.toDict()
         }
 
+    def getGlb(self, path):
+        self.body.glb.save2File(path)
+
+    def getGltf(self, path, mergeBin = False):
+        """ 从b3dm中获取gltf部分
+
+            params:
+                path: gltf文件的保存路径
+                mergeBin: 是否把二进制数据融合至gltf文件内
+        """
+        self.body.glb.save2GltfFile(path, mergeBin, False)
+
 class I3dmBody:
     '''
     body = featuretable + [batchtable] + glb
@@ -51,24 +63,25 @@ class I3dmBody:
     def __init__(self, header, bufferData):
         offset = 0
         # ------ FeatureTable
-        ftJSONLen = header.featureTableJSONByteLength
-        ftBinLen = header.featureTableBinaryByteLength
+        ftJSONLen = header['featureTableJSONByteLength']
+        ftBinLen = header['featureTableBinaryByteLength']
         ftJSONBuffer = bufferData[0:ftJSONLen]
         offset += ftJSONLen + ftBinLen
         ftBinBuffer = bufferData[ftJSONLen:offset]
-        self.featureTable = FeatureTable(header.magic, ftJSONBuffer, ftBinBuffer)
+        self.featureTable = FeatureTable(header['magic'], ftJSONBuffer, ftBinBuffer)
 
         # ------ BatchTable
-        btJSONLen = header.batchTableJSONByteLength
-        btBinLen = header.batchTableBinaryByteLength
+        btJSONLen = header['batchTableJSONByteLength']
+        btBinLen = header['batchTableBinaryByteLength']
         btJSONBuffer = bufferData[offset:offset + btJSONLen]
         offset += btJSONLen
         btBinBuffer = bufferData[offset:offset+btBinLen]
-        self.batchTable = BatchTable(header.magic, btJSONBuffer, btBinBuffer, self.featureTable.ftJSON)
+        self.batchTable = BatchTable(header['magic'], btJSONBuffer, btBinBuffer, self.featureTable.ftJSON)
 
-        # ------ GlTF TODO
-        bodySize = header.featureTableJSONByteLength + header.featureTableBinaryByteLength + header.batchTableJSONByteLength + header.batchTableBinaryByteLength
-        self.glb = glb(bufferData[bodySize:])
+        # ------ GlTF
+        bodySize = header['featureTableJSONByteLength'] + header['featureTableBinaryByteLength'] + header['batchTableJSONByteLength'] + header['batchTableBinaryByteLength']
+        self.glbBytes = bufferData[bodySize:]
+        self.glb = glb(self.glbBytes)
 
     def toDict(self) -> dict:
         '''
@@ -76,9 +89,7 @@ class I3dmBody:
         '''
         return {
             "I3dm.Body.FeatureTable": self.featureTable.toDict(),
-            "I3dm.Body.BatchTable": self.batchTable.toDict(),
-            "I3dm.Body.glTF": self.glb.toDict()[0], # 测试性质
-            "I3dm.Body.glTF_Bin": self.glb.toDict()[1] # 测试性质
+            "I3dm.Body.BatchTable": self.batchTable.toDict()
         }
 
     def toString(self) -> str:
